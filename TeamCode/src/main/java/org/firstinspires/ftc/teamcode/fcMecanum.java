@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-@TeleOp(name="FC Mecanum", group="Jim")
+@TeleOp(name="FC Mecanum", group="JRB")
 public class fcMecanum extends OpMode {
     DcMotor fL, fR, rL, rR   = null;
     MecanumDrive drive = null;

@@ -37,10 +37,10 @@ public class fcMecanum extends OpMode {
         drive = new MecanumDrive(m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr);
 
         // Invert motors as needed so forward is the correct direction
-        m_motor_fl.setInverted(false);
-        m_motor_fr.setInverted(false);
-        m_motor_rl.setInverted(true);
-        m_motor_rr.setInverted(true);
+        m_motor_fl.setInverted(true);
+        m_motor_fr.setInverted(true);
+        m_motor_rl.setInverted(false);
+        m_motor_rr.setInverted(false);
 
         // Set the runmode for each motor
         for (Motor m : m_motors) {
@@ -79,7 +79,7 @@ public class fcMecanum extends OpMode {
         }
 
         // Update all telemetry data
-        telemetry.addData("Heading", String.format("%.2f",imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)));
+        telemetry.addData("Heading", "%.2f", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
         //telemetry.update(); //this is called automatically every loop
     }
 }

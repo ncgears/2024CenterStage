@@ -4,11 +4,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import java.util.Locale;
-
 @Autonomous(name="Gyro Test", group="JRB")
 public class autonGyroTest extends LinearOpMode {
-    hwMecanum robot = new hwMecanum();
+    hwMecanum robot = new hwMecanum(this);
     private ElapsedTime runtime = new ElapsedTime();
     private double lastAngle = 0.0;
     private double currAngle = 0.0;
@@ -18,10 +16,14 @@ public class autonGyroTest extends LinearOpMode {
         robot.init(hardwareMap);
         waitForStart();
 
-        turn(90);
-        sleep(3000);
-        turnTo(-90);
+        robot.imu.resetYaw();
+        sleep(50);
 
+        turnPID(90);  //left
+        sleep(3000);
+        turnToPID(-90); //180deg from prev turn
+
+//        telemetry.update();
     }
 
     public void resetAngle() {
@@ -35,7 +37,8 @@ public class autonGyroTest extends LinearOpMode {
         deltaAngle = normalizeAngle(deltaAngle);
         currAngle += deltaAngle;
         lastAngle = yaw;
-        telemetry.addData("Gyro", String.format(Locale.ENGLISH,"%.2f",yaw));
+        telemetry.addData("Gyro", "%.2f",yaw);
+        telemetry.update();
         return currAngle;
     }
 
@@ -46,21 +49,40 @@ public class autonGyroTest extends LinearOpMode {
     }
 
     public void turn(double degrees) {
+        telemetry.addData("Action", "Turn %.2f degrees", degrees);
+//        telemetry.update();
         resetAngle();
         double error = degrees;
         while (opModeIsActive() && Math.abs(error) > 2.0) {
-            double motorPower = (error < 0) ? -0.3 : 0.3;
+            double motorPower = (error < 0) ? 0.3 : -0.3;
             robot.setDrivePower(-motorPower, motorPower, -motorPower, motorPower);
             error = degrees - getAngle();
-            telemetry.addData("Error", String.format(Locale.ENGLISH, "%.2f", error));
+            telemetry.addData("Error", "%.2f", error);
         }
-        robot.setAllDrivePower(0);
+        robot.setAllDrivePower(0); //make sure it stops when we get to target
     }
 
     public void turnTo(double degrees) {
+        telemetry.addData("Action", "Turn to %.2f degrees", degrees);
+//        telemetry.update();
         double yaw = robot.getRobotYaw();
         double error = degrees - yaw;
         error = normalizeAngle(error);
         turn(error);
+    }
+
+    public void turnPID(double degrees) {
+        turnToPID(degrees + robot.getRobotYaw());
+    }
+
+    public void turnToPID(double targetAngle) {
+        pidTurnController pid = new pidTurnController(targetAngle, 0.01, 0, 0.003);
+        while (opModeIsActive() && Math.abs(targetAngle - robot.getRobotYaw()) > 1) {
+            double motorPower = pid.update(robot.getRobotYaw());
+            telemetry.addData("Power", "%.2f", motorPower);
+            telemetry.update();
+            robot.setDrivePower(motorPower, -motorPower, motorPower, -motorPower);
+        }
+        robot.setAllDrivePower(0); //make sure it stops when we get to target
     }
 }

@@ -30,6 +30,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -71,12 +72,13 @@ public class hwMecanum {
 
     /* Local OpMode members. */
     HardwareMap hwMap = null;
+    LinearOpMode myOpMode = null;   // gain access to methods in the calling OpMode.
 //    private LinearOpMode myOpMode = null;   // gain access to methods in the calling OpMode.
 
     // Define a constructor that allows the OpMode to pass a reference to itself.
-    public hwMecanum() {
+    public hwMecanum(LinearOpMode opmode) {
+        myOpMode = opmode;
     }
-
     /**
      * Initialize all the robot's hardware.
      * This method must be called ONCE when the OpMode is initialized.
@@ -96,18 +98,18 @@ public class hwMecanum {
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-        m_motor_fl.setDirection(DcMotor.Direction.REVERSE);
+        m_motor_fl.setDirection(DcMotor.Direction.FORWARD);
         m_motor_fr.setDirection(DcMotor.Direction.REVERSE);
-        m_motor_rl.setDirection(DcMotor.Direction.FORWARD);
+        m_motor_rl.setDirection(DcMotor.Direction.REVERSE);
         m_motor_rr.setDirection(DcMotor.Direction.FORWARD);
 
         // Setup the motors
-        setAllDrivePower(0);
+        //setAllDrivePower(0);
         for (DcMotor m : m_motors) {
             // Encoder setup
             m.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); //greater speed
-            // m.setMode(DcMotor.RunMode.RUN_USING_ENCODER); //greater accuracy (80% speed)
-            m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//            m.setMode(DcMotor.RunMode.RUN_USING_ENCODER); //greater accuracy (80% speed)
+//            m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
             // Brake/Coast Mode
             m.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -119,8 +121,8 @@ public class hwMecanum {
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
         imu.initialize(imuParams);
 
-        BlocksOpModeCompanion.telemetry.addData(">", "Hardware Initialized");
-        BlocksOpModeCompanion.telemetry.update();
+        myOpMode.telemetry.addData("Robot", "Hardware Initialized");
+        myOpMode.telemetry.update();
     }
 
     public void setAllDrivePower(double p) {
@@ -132,6 +134,10 @@ public class hwMecanum {
         m_motor_fr.setPower(fr);
         m_motor_rl.setPower(rl);
         m_motor_rr.setPower(rr);
+        myOpMode.telemetry.addData("fl","%.1f", fl);
+        myOpMode.telemetry.addData("fr","%.1f", fr);
+        myOpMode.telemetry.addData("rl","%.1f", rl);
+        myOpMode.telemetry.addData("rr","%.1f", rr);
     }
 
     public double getRobotYaw() {

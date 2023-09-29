@@ -25,7 +25,8 @@ public class pidTurnController {
 
         //I - Integral - This accumulates the error over time to correct for not getting to the set point
         accumulatedError += error;
-        if (Math.abs(error) < 1) {
+        //if we reach the threshold, reset accumulated error to stop adding it
+        if (Math.abs(error) < Constants.Drivetrain.turnController.targetThreshold) {
             accumulatedError = 0;
         }
         accumulatedError = Math.abs(accumulatedError) * Math.signum(error);

@@ -53,8 +53,8 @@ public class autonGyroTest extends LinearOpMode {
 //        telemetry.update();
         resetAngle();
         double error = degrees;
-        while (opModeIsActive() && Math.abs(error) > 2.0) {
-            double motorPower = (error < 0) ? 0.3 : -0.3;
+        while (opModeIsActive() && Math.abs(error) > Constants.Drivetrain.turnController.targetThreshold) {
+            double motorPower = Constants.Auton.autonDriveSpeed * Math.signum(error);
             robot.setDrivePower(-motorPower, motorPower, -motorPower, motorPower);
             error = degrees - getAngle();
             telemetry.addData("Error", "%.2f", error);
@@ -76,8 +76,8 @@ public class autonGyroTest extends LinearOpMode {
     }
 
     public void turnToPID(double targetAngle) {
-        pidTurnController pid = new pidTurnController(targetAngle, 0.01, 0, 0.003);
-        while (opModeIsActive() && Math.abs(targetAngle - robot.getRobotYaw()) > 1) {
+        pidTurnController pid = new pidTurnController(targetAngle, Constants.Drivetrain.turnController.kP, Constants.Drivetrain.turnController.kI, Constants.Drivetrain.turnController.kD);
+        while (opModeIsActive() && Math.abs(targetAngle - robot.getRobotYaw()) > Constants.Drivetrain.turnController.targetThreshold) {
             double motorPower = pid.update(robot.getRobotYaw());
             telemetry.addData("Power", "%.2f", motorPower);
             telemetry.update();

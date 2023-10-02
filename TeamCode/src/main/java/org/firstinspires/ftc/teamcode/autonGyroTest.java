@@ -19,9 +19,17 @@ public class autonGyroTest extends LinearOpMode {
         robot.imu.resetYaw();
         sleep(50);
 
-        turnPID(90);  //left
-        sleep(3000);
-        turnToPID(-90); //180deg from prev turn
+//        turnPID(90);  //left
+//        sleep(3000);
+//        turnToPID(-90); //180deg from prev turn
+
+        robot.setAllDrivePower(-0.2);
+        robot.resetAllDriveEncoder();
+        while (opModeIsActive()) {
+            robot.getDriveAvgPosition();
+            sleep(50);
+        }
+        sleep(5000);
 
 //        telemetry.update();
     }

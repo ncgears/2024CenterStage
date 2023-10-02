@@ -112,7 +112,7 @@ public class hwMecanum {
 //            m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
             // Brake/Coast Mode
-            m.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//            m.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
 
         // Adjust the orientation parameters of the IMU
@@ -134,10 +134,37 @@ public class hwMecanum {
         m_motor_fr.setPower(fr);
         m_motor_rl.setPower(rl);
         m_motor_rr.setPower(rr);
-        myOpMode.telemetry.addData("fl","%.1f", fl);
-        myOpMode.telemetry.addData("fr","%.1f", fr);
-        myOpMode.telemetry.addData("rl","%.1f", rl);
-        myOpMode.telemetry.addData("rr","%.1f", rr);
+        myOpMode.telemetry.addData("fl power","%.1f", fl);
+        myOpMode.telemetry.addData("fr power","%.1f", fr);
+        myOpMode.telemetry.addData("rl power","%.1f", rl);
+        myOpMode.telemetry.addData("rr power","%.1f", rr);
+    }
+
+    public void resetAllDriveEncoder() {
+        DcMotor[] m_motors = {m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr};
+        for (DcMotor m : m_motors) {
+            m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        }
+    }
+
+    public int getDriveAvgPosition() {
+        int fl = m_motor_fl.getCurrentPosition();
+        int fr = m_motor_fr.getCurrentPosition();
+        int rl = m_motor_rl.getCurrentPosition();
+        int rr = m_motor_rr.getCurrentPosition();
+
+        //right
+        double right = Math.min(Math.abs(fr),Math.abs(rr)) * Math.signum(fr);
+        //left
+        double left = Math.min(Math.abs(fl),Math.abs(rl)) * Math.signum(fr);
+        //average
+
+        myOpMode.telemetry.addData("fl enc", "%d", fl);
+        myOpMode.telemetry.addData("fr enc", "%d", fr);
+        myOpMode.telemetry.addData("rl enc", "%d", rl);
+        myOpMode.telemetry.addData("rr enc", "%d", rr);
+        //shouldnt happen
+        return 0;
     }
 
     public double getRobotYaw() {

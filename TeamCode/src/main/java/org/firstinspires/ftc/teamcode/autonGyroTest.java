@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 @Autonomous(name="Gyro Test", group="JRB")
 public class autonGyroTest extends LinearOpMode {
     hwMecanum robot = new hwMecanum(this);
+    helpers helpers = new helpers();
     private ElapsedTime runtime = new ElapsedTime();
     private double lastAngle = 0.0;
     private double currAngle = 0.0;
@@ -19,17 +20,20 @@ public class autonGyroTest extends LinearOpMode {
         robot.imu.resetYaw();
         sleep(50);
 
-//        turnPID(90);  //left
-//        sleep(3000);
+        turnPID(90);  //left
+        sleep(3000);
+        turnPID(-90);  //left
+        sleep(3000);
 //        turnToPID(-90); //180deg from prev turn
 
-        robot.setAllDrivePower(-0.2);
-        robot.resetAllDriveEncoder();
-        while (opModeIsActive()) {
-            robot.getDriveAvgPosition();
-            sleep(50);
-        }
-        sleep(5000);
+//        robot.resetAllDriveEncoder();
+//        robot.setAllDrivePower(-0.2);
+//        while (opModeIsActive()) {
+//            robot.getDriveAvgPosition();
+//            sleep(50);
+//        }
+        drivePID(24.0);
+        sleep(3000);
 
 //        telemetry.update();
     }
@@ -84,13 +88,27 @@ public class autonGyroTest extends LinearOpMode {
     }
 
     public void turnToPID(double targetAngle) {
-        pidTurnController pid = new pidTurnController(targetAngle, Constants.Drivetrain.turnController.kP, Constants.Drivetrain.turnController.kI, Constants.Drivetrain.turnController.kD);
+        pidTurnController pid = new pidTurnController(this, targetAngle, Constants.Drivetrain.turnController.kP, Constants.Drivetrain.turnController.kI, Constants.Drivetrain.turnController.kD);
         while (opModeIsActive() && Math.abs(targetAngle - robot.getRobotYaw()) > Constants.Drivetrain.turnController.targetThreshold) {
             double motorPower = pid.update(robot.getRobotYaw());
             telemetry.addData("Power", "%.2f", motorPower);
             telemetry.update();
-            robot.setDrivePower(motorPower, -motorPower, motorPower, -motorPower);
+            robot.setDrivePower(-motorPower, motorPower, -motorPower, motorPower);
         }
         robot.setAllDrivePower(0); //make sure it stops when we get to target
+    }
+
+    public void drivePID(double targetInches) {
+        double targetTicks = targetInches * Constants.Drivetrain.ticksPerInch + robot.getDriveAvgPosition();
+        telemetry.addData("target","%.2f", targetTicks);
+        telemetry.update();
+        pidDriveController pid = new pidDriveController(this, targetTicks, Constants.Drivetrain.driveController.kP, Constants.Drivetrain.driveController.kI, Constants.Drivetrain.driveController.kD);
+        while (opModeIsActive() && Math.abs(targetTicks - robot.getDriveAvgPosition()) > Constants.Drivetrain.driveController.targetThresholdTicks) {
+            double motorPower = pid.update(robot.getDriveAvgPosition());
+            telemetry.addData("Power", "%.2f", motorPower);
+            telemetry.update();
+            robot.setAllDrivePower(motorPower);
+        }
+        robot.setAllDrivePower(0);
     }
 }

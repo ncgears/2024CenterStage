@@ -98,10 +98,10 @@ public class hwMecanum {
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-        m_motor_fl.setDirection(DcMotor.Direction.FORWARD);
-        m_motor_fr.setDirection(DcMotor.Direction.REVERSE);
-        m_motor_rl.setDirection(DcMotor.Direction.REVERSE);
-        m_motor_rr.setDirection(DcMotor.Direction.FORWARD);
+        m_motor_fl.setDirection(DcMotor.Direction.REVERSE);
+        m_motor_fr.setDirection(DcMotor.Direction.FORWARD);
+        m_motor_rl.setDirection(DcMotor.Direction.FORWARD);
+        m_motor_rr.setDirection(DcMotor.Direction.REVERSE);
 
         // Setup the motors
         //setAllDrivePower(0);
@@ -154,17 +154,22 @@ public class hwMecanum {
         int rr = m_motor_rr.getCurrentPosition();
 
         //right
-        double right = Math.min(Math.abs(fr),Math.abs(rr)) * Math.signum(fr);
+//        double right = Math.min(Math.abs(fr),Math.abs(rr)) * Math.signum(fr);
+        double right = fr;
         //left
-        double left = Math.min(Math.abs(fl),Math.abs(rl)) * Math.signum(fr);
+//        double left = Math.min(Math.abs(fl),Math.abs(rl)) * Math.signum(fr);
+        double left = fl;
         //average
+        int avg = (int) ((right + left) / 2);
 
         myOpMode.telemetry.addData("fl enc", "%d", fl);
         myOpMode.telemetry.addData("fr enc", "%d", fr);
         myOpMode.telemetry.addData("rl enc", "%d", rl);
         myOpMode.telemetry.addData("rr enc", "%d", rr);
-        //shouldnt happen
-        return 0;
+        myOpMode.telemetry.addData("avg enc", "%d", avg);
+        myOpMode.telemetry.update();
+
+        return avg;
     }
 
     public double getRobotYaw() {

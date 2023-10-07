@@ -29,6 +29,9 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.arcrobotics.ftclib.drivebase.MecanumDrive;
+import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -38,7 +41,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion;
 
 /*
  * This file works in conjunction with the External Hardware Class sample called: ConceptExternalHardwareClass.java
@@ -59,15 +61,14 @@ import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion;
  *
  */
 
-public class hwMecanum {
+public class hwMecanumFtclib {
 
     /* Public OpMode members. */
 
     // Define Motor and Servo objects  (Make them private so they can't be accessed externally)
-    public DcMotor m_motor_fl   = null;
-    public DcMotor m_motor_fr  = null;
-    public DcMotor m_motor_rl = null;
-    public DcMotor m_motor_rr = null;
+    public Motor m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr = null;
+    public GamepadEx driverOp = null;
+    public MecanumDrive drive = null;
     public TouchSensor m_blueflag, m_redflag, m_elevstow, m_elevdown = null;
     public Servo m_pixelservo = null;
     public IMU imu = null;
@@ -81,7 +82,7 @@ public class hwMecanum {
 //    private LinearOpMode myOpMode = null;   // gain access to methods in the calling OpMode.
 
     // Define a constructor that allows the OpMode to pass a reference to itself.
-    public hwMecanum(LinearOpMode opmode) {
+    public hwMecanumFtclib(LinearOpMode opmode) {
         myOpMode = opmode;
     }
     /**
@@ -93,12 +94,14 @@ public class hwMecanum {
     public void init(HardwareMap ahwMap) {
         hwMap = ahwMap;
         // Define and Initialize Motors (note: need to use reference to actual OpMode).
-        m_motor_fl = hwMap.get(DcMotor.class, "FL DRIVE");
-        m_motor_fr = hwMap.get(DcMotor.class, "FR DRIVE");
-        m_motor_rl = hwMap.get(DcMotor.class, "RL DRIVE");
-        m_motor_rr = hwMap.get(DcMotor.class, "RR DRIVE");
-        DcMotor[] m_motors = {m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr};
         imu = hwMap.get(IMU.class, "imu");
+        m_motor_fl = new Motor(hwMap, "FL DRIVE");
+        m_motor_fr = new Motor(hwMap, "FR DRIVE");
+        m_motor_rl = new Motor(hwMap, "RL DRIVE");
+        m_motor_rr = new Motor(hwMap, "RR DRIVE");
+        Motor[] m_motors = {m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr};
+        imu = hwMap.get(IMU.class, "imu");
+        drive = new MecanumDrive(m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr);
         m_elevdown = hwMap.get(TouchSensor.class, "SW ELEV DOWN");
         m_elevstow = hwMap.get(TouchSensor.class, "SW ELEV STOW");
         m_blueflag = hwMap.get(TouchSensor.class, "SW BLUE FLAG");

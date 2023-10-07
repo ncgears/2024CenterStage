@@ -24,7 +24,8 @@ android {
 }
 
 dependencies {
-    implementation 'org.ftclib.ftclib:core:2.0.1' //docs.ftclib.org
+    implementation 'org.ftclib.ftclib:core:2.1.1' //docs.ftclib.org
+    implementation 'com.github.StateFactory-Dev:StateFactory:v0.3' //state-factory.gitbook.io/state-factory
     implementation project(':FtcRobotController')
     annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
 }

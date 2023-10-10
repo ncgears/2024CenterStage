@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-public class pidDriveController {
+public class pidDriveController2 {
     private double targetTicks;
     private double kP, kI, kD;
     private double accumulatedError = 0.0;
@@ -11,7 +11,7 @@ public class pidDriveController {
     private double lastError, lastTime = 0.0;
     private OpMode myOpMode = null;
 
-    public pidDriveController(OpMode opmode, double target, double p, double i, double d) {
+    public pidDriveController2(OpMode opmode, double target, double p, double i, double d) {
         myOpMode = opmode;
         targetTicks = target;
         kP = p;
@@ -27,7 +27,7 @@ public class pidDriveController {
         //I - Integral - This accumulates the error over time to correct for not getting to the set point
         accumulatedError += error;
         //if we reach the threshold, reset accumulated error to stop adding it
-        if (Math.abs(error) < Constants.Drivetrain.driveController.targetThresholdTicks) {
+        if (atTarget(error)) {
             accumulatedError = 0;
         }
         accumulatedError = Math.abs(accumulatedError) * Math.signum(error);
@@ -45,5 +45,24 @@ public class pidDriveController {
                 (kP * error) + (kI * accumulatedError) + (kD * slope)
         );
         return motorPower;
+    }
+
+    public double getTarget() {
+        return targetTicks;
+    }
+
+    public void setTarget(double ticks) {
+        targetTicks = ticks;
+    }
+
+    public double getLastError() {
+        return lastError;
+    }
+
+    public boolean atTarget(double error) {
+        return (Math.abs(error) < Constants.Drivetrain.driveController.targetThresholdTicks);
+    }
+    public boolean atTarget() {
+        return (Math.abs(lastError) < Constants.Drivetrain.driveController.targetThresholdTicks);
     }
 }

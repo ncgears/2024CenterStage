@@ -33,8 +33,7 @@ import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -67,22 +66,22 @@ public class hwMecanumFtclib {
 
     // Define Motor and Servo objects  (Make them private so they can't be accessed externally)
     public Motor m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr = null;
+    public Motor[] m_motors = null;
     public GamepadEx driverOp = null;
     public MecanumDrive drive = null;
     public TouchSensor m_blueflag, m_redflag, m_elevstow, m_elevdown = null;
     public Servo m_pixelservo = null;
     public IMU imu = null;
 
-
     // Define Drive constants.  Make them public so they CAN be used by the calling OpMode
 
     /* Local OpMode members. */
     HardwareMap hwMap = null;
-    LinearOpMode myOpMode = null;   // gain access to methods in the calling OpMode.
+    OpMode myOpMode = null;   // gain access to methods in the calling OpMode.
 //    private LinearOpMode myOpMode = null;   // gain access to methods in the calling OpMode.
 
     // Define a constructor that allows the OpMode to pass a reference to itself.
-    public hwMecanumFtclib(LinearOpMode opmode) {
+    public hwMecanumFtclib(OpMode opmode) {
         myOpMode = opmode;
     }
     /**
@@ -93,39 +92,44 @@ public class hwMecanumFtclib {
      */
     public void init(HardwareMap ahwMap) {
         hwMap = ahwMap;
-        // Define and Initialize Motors (note: need to use reference to actual OpMode).
+        // Define and Initialize Motors
         imu = hwMap.get(IMU.class, "imu");
         m_motor_fl = new Motor(hwMap, "FL DRIVE");
         m_motor_fr = new Motor(hwMap, "FR DRIVE");
         m_motor_rl = new Motor(hwMap, "RL DRIVE");
         m_motor_rr = new Motor(hwMap, "RR DRIVE");
         Motor[] m_motors = {m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr};
-        imu = hwMap.get(IMU.class, "imu");
         drive = new MecanumDrive(m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr);
-        m_elevdown = hwMap.get(TouchSensor.class, "SW ELEV DOWN");
-        m_elevstow = hwMap.get(TouchSensor.class, "SW ELEV STOW");
-        m_blueflag = hwMap.get(TouchSensor.class, "SW BLUE FLAG");
-        m_redflag = hwMap.get(TouchSensor.class, "SW RED FLAG");
-        m_pixelservo = hwMap.get(Servo.class, "SRV PIXEL");
+        // Gamepads
+        driverOp = new GamepadEx(myOpMode.gamepad1);
+        //operOp = new GamepadEx(myOpMode.gamepad2);
+
+        try {
+            //m_elevdown = hwMap.get(TouchSensor.class, "SW ELEV DOWN");
+            //m_elevstow = hwMap.get(TouchSensor.class, "SW ELEV STOW");
+            //m_blueflag = hwMap.get(TouchSensor.class, "SW BLUE FLAG");
+            //m_redflag = hwMap.get(TouchSensor.class, "SW RED FLAG");
+            //m_pixelservo = hwMap.get(Servo.class, "SRV PIXEL");
+        } catch (Exception e) {
+            //splat!
+        }
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-        m_motor_fl.setDirection(DcMotor.Direction.REVERSE);
-        m_motor_fr.setDirection(DcMotor.Direction.FORWARD);
-        m_motor_rl.setDirection(DcMotor.Direction.FORWARD);
-        m_motor_rr.setDirection(DcMotor.Direction.REVERSE);
+        m_motor_fl.setInverted(true);
+        m_motor_rl.setInverted(true);
+        m_motor_fr.setInverted(false);
+        m_motor_rr.setInverted(false);
 
-        // Setup the motors
-        //setAllDrivePower(0);
-        for (DcMotor m : m_motors) {
-            // Encoder setup
-            m.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); //greater speed
-//            m.setMode(DcMotor.RunMode.RUN_USING_ENCODER); //greater accuracy (80% speed)
-//            m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        // Set the runmode for each motor
+        for (Motor m : m_motors) {
+            m.setRunMode(Motor.RunMode.RawPower);
+        }
 
-            // Brake/Coast Mode
-//            m.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        // Reset the encoders for each motor
+        for (Motor m : m_motors) {
+            m.resetEncoder();
         }
 
         // Adjust the orientation parameters of the IMU
@@ -143,10 +147,10 @@ public class hwMecanumFtclib {
     }
 
     public void setDrivePower(double fl, double fr, double rl, double rr) {
-        m_motor_fl.setPower(fl);
-        m_motor_fr.setPower(fr);
-        m_motor_rl.setPower(rl);
-        m_motor_rr.setPower(rr);
+        m_motor_fl.set(fl);
+        m_motor_fr.set(fr);
+        m_motor_rl.set(rl);
+        m_motor_rr.set(rr);
         myOpMode.telemetry.addData("fl power","%.1f", fl);
         myOpMode.telemetry.addData("fr power","%.1f", fr);
         myOpMode.telemetry.addData("rl power","%.1f", rl);
@@ -154,9 +158,8 @@ public class hwMecanumFtclib {
     }
 
     public void resetAllDriveEncoder() {
-        DcMotor[] m_motors = {m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr};
-        for (DcMotor m : m_motors) {
-            m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        for (Motor m : m_motors) {
+            m.resetEncoder();
         }
     }
 
@@ -175,17 +178,21 @@ public class hwMecanumFtclib {
         //average
         int avg = (int) ((right + left) / 2);
 
-        myOpMode.telemetry.addData("fl enc", "%d", fl);
-        myOpMode.telemetry.addData("fr enc", "%d", fr);
-        myOpMode.telemetry.addData("rl enc", "%d", rl);
-        myOpMode.telemetry.addData("rr enc", "%d", rr);
+//        myOpMode.telemetry.addData("fl enc", "%d", fl);
+//        myOpMode.telemetry.addData("fr enc", "%d", fr);
+//        myOpMode.telemetry.addData("rl enc", "%d", rl);
+//        myOpMode.telemetry.addData("rr enc", "%d", rr);
         myOpMode.telemetry.addData("avg enc", "%d", avg);
-        myOpMode.telemetry.update();
+//        myOpMode.telemetry.update();
 
         return avg;
     }
 
     public double getRobotYaw() {
-        return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        try {
+            return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        } catch(Exception e) {
+            return 0.0;
+        }
     }
 }

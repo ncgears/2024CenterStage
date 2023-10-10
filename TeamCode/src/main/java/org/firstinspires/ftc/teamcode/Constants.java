@@ -1,8 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
 public class Constants {
+    enum Commands {
+        NONE,
+        ROBOT_RESET,
+        GYRO_RESET
+    }
     public static class Global {
-
     }
     public static class Auton {
         public static double autonDriveSpeed = 0.3;

@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class pidTurnController {
@@ -9,9 +9,9 @@ public class pidTurnController {
     private double accumulatedError = 0.0;
     private ElapsedTime timer = new ElapsedTime();
     private double lastError, lastTime = 0.0;
-    private LinearOpMode myOpMode = null;
+    private OpMode myOpMode = null;
 
-    public pidTurnController(LinearOpMode opmode, double target, double p, double i, double d) {
+    public pidTurnController(OpMode opmode, double target, double p, double i, double d) {
         myOpMode = opmode;
         targetAngle = target;
         kP = p;

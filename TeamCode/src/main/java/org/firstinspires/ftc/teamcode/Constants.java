@@ -1,11 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
 public class Constants {
-    enum Commands {
-        NONE,
-        ROBOT_RESET,
-        GYRO_RESET
-    }
+    public enum Commands { NONE, ROBOT_RESET, GYRO_RESET, DETERMINE_TEAM }
+    public enum Alliance { RED, BLUE, NONE }
+    public enum TSELocation { LEFT, MIDDLE, RIGHT, NONE }
     public static class Global {
     }
     public static class Auton {

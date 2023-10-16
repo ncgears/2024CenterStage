@@ -31,7 +31,7 @@ public class pidTurnControllerFtclib {
         //I - Integral - This accumulates the error over time to correct for not getting to the set point
         accumulatedError += error;
         //if we reach the threshold, reset accumulated error to stop adding it
-        if (atTarget(error)) {
+        if (atTarget(currentAngle)) {
             accumulatedError = 0;
         }
         accumulatedError = Math.abs(accumulatedError) * Math.signum(error);
@@ -62,10 +62,12 @@ public class pidTurnControllerFtclib {
         return lastError;
     }
 
-    public boolean atTarget(double error) {
+    public boolean atTarget(double currentAngle) {
+        double error = targetAngle - currentAngle;
+        error %= 360;
+        error += 360;
+        error %= 360;
+        if (error > 180) error -= 360;
         return (Math.abs(error) < Constants.Drivetrain.turnController.targetThreshold);
-    }
-    public boolean atTarget() {
-        return (Math.abs(lastError) < Constants.Drivetrain.turnController.targetThreshold);
     }
 }

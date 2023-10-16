@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 public class Constants {
-    public enum Commands { NONE, ROBOT_RESET, GYRO_RESET, DETERMINE_TEAM }
+    public enum Commands { NONE, ROBOT_RESET, GYRO_RESET, DETERMINE_TEAM, PID_TURN_0, PID_TURN_90, PID_TURN_N90, PID_TURN_180 }
     public enum Alliance { RED, BLUE, NONE }
     public enum TSELocation { LEFT, MIDDLE, RIGHT, NONE }
     public static class Global {

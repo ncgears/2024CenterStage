@@ -76,7 +76,7 @@ public class autonJRB1 extends OpMode {
                 .onExit( () -> { //actions to perform when exiting state
                     pid_turning = false;
                 })
-                .transition( () -> (pid_turning && (turnpid.atTarget() || elapsed.seconds() > 5)), States.RESTING ) // transition when condition check2 == false
+                .transition( () -> (pid_turning && (turnpid.atTarget(robot.getRobotYaw()) || elapsed.seconds() > 5)), States.RESTING ) // transition when condition check2 == false
                 .state(States.RESTING) //create state
                 .onEnter( () -> { //actions to perform when entering state
                     pid_driving = false;

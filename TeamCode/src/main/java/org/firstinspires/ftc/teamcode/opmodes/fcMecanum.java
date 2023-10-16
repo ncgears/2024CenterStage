@@ -94,19 +94,4 @@ public class fcMecanum extends OpMode {
         telemetry.addData("Heading", "%.2f", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
         //telemetry.update(); //this is called automatically every loop
     }
-
-    public void turnPID(double degrees) {
-        turnToPID(degrees + robot.getRobotYaw());
-    }
-
-    public void turnToPID(double targetAngle) {
-        pidTurnController pid = new pidTurnController(this, targetAngle, Constants.Drivetrain.turnController.kP, Constants.Drivetrain.turnController.kI, Constants.Drivetrain.turnController.kD);
-        while (Math.abs(targetAngle - robot.getRobotYaw()) > Constants.Drivetrain.turnController.targetThreshold) {
-            double motorPower = pid.update(robot.getRobotYaw());
-            telemetry.addData("Power", "%.2f", motorPower);
-            telemetry.update();
-            robot.setDrivePower(-motorPower, motorPower, -motorPower, motorPower);
-        }
-        robot.setAllDrivePower(0); //make sure it stops when we get to target
-    }
 }

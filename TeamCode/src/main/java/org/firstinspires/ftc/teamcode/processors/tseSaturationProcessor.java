@@ -12,7 +12,7 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-public class hwVision implements VisionProcessor {
+public class tseSaturationProcessor implements VisionProcessor {
     public Rect rectLeft = new Rect(10,100,200,200);
     public Rect rectMiddle = new Rect(220, 100, 200, 200);
     public Rect rectRight = new Rect(430, 100, 200, 200);

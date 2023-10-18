@@ -186,7 +186,7 @@ public class autonJRB1 extends OpMode {
     }
 
     public void driveInchesPID(double targetInches) {
-        pid_drive_target = targetInches * Constants.Drivetrain.ticksPerInch + robot.getDriveAvgPosition();
+        pid_drive_target = targetInches * Constants.Drivetrain.driveController.ticksPerInch + robot.getDriveAvgPosition();
     }
 
 }

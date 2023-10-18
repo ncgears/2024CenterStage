@@ -105,7 +105,7 @@ public class autonGyroTest extends LinearOpMode {
     }
 
     public void drivePID(double targetInches) {
-        double targetTicks = targetInches * Constants.Drivetrain.ticksPerInch + robot.getDriveAvgPosition();
+        double targetTicks = targetInches * Constants.Drivetrain.driveController.ticksPerInch + robot.getDriveAvgPosition();
         telemetry.addData("target","%.2f", targetTicks);
         telemetry.update();
         pidDriveController pid = new pidDriveController(this, targetTicks, Constants.Drivetrain.driveController.kP, Constants.Drivetrain.driveController.kI, Constants.Drivetrain.driveController.kD);

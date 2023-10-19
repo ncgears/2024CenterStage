@@ -31,14 +31,49 @@ public class Constants {
         }
     }
 
+    public static class PixelDropper {
+        public static enum Positions {
+            DOWN(0.0),
+            UP(20.0);
+            private final double angle;
+            private Positions(double angle) { this.angle = angle; }
+            public double getAngle() { return this.angle; }
+        }
+    }
+
     /**
      * The Manipulator constants relate to the top-end system above the drivetrain.
      * The manipulator contains 2 major parts, the elevator and the extend.
-     * elevator - This controls the angle of the delivery "bucket" and ranges from ~-19 degrees (floor pickup) to ~+58 degrees (hanger) relative to the floor plane
-     * extend - This controls the length of the extended arm with the delivery bucket and ranges from 0 inches to 12.3 inches
+     * tilt - This controls the angle of the delivery "bucket" and ranges from ~-19 degrees (floor pickup) to ~+58 degrees (hanger) relative to the floor plane
+     * elevator - This controls the length of the extended arm with the delivery bucket and ranges from 0 inches to 12.3 inches
      */
     public static class Manipulator {
-        public static class elevatorController {
+        public static enum Positions {
+            //NAME(angle,length,distance)
+            //angle = (double) angle of the elevator, from the limit switch reference plane
+            //length = (double) length of the extend
+            //distance = (double) robot distance from backstage (-1 if not used)
+            START(0.0,1.0,-1.0),
+            TRANSPORT(18.0,0.0,-1.0),
+            FLOOR_CLOSE(0.0,1.0,-1.0),
+            FLOOR_FAR(3.0,2.0,-1.0),
+            FLOOR_DESTACK(3.2,2.0,-1.0),
+            SCORE_ROW1(49.6,1.9,0.0),
+            //SCORE_ROWX(78.0,12.3,0.0),
+            CLIMB_READY(78.0,3.0,-1.0),
+            CLIMB_UP(78.0,12.3,-1.0),
+            CLIMB_LIFT(78.0,11.0,-1.0);
+            private final double angle, length, distance;
+            private Positions(double angle, double length, double distance) {
+                this.angle = angle;
+                this.length = length;
+                this.distance = distance;
+            }
+            public double getAngle() { return this.angle; }
+            public double getLength() { return this.length; }
+            public double getDistance() { return this.distance; }
+        }
+        public static class tiltController {
             public static double targetThreshold = 0.5; //how many degrees is close enough
             public static double kP = 0.01;
             public static double kI = 0.0;
@@ -52,7 +87,7 @@ public class Constants {
                 public static double maxScoringAngle = 65.0; //Highest scoring position, just above row of pixels that cross top scoring line;
             }
         }
-        public static class extendController {
+        public static class elevatorController {
             public static double ticksPerRev = 28;
             public static double gearReduction = 20;
             public static double drumDiamInches = 1.3;

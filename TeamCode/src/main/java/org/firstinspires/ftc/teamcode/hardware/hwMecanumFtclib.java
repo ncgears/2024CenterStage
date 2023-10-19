@@ -33,16 +33,19 @@ import static org.firstinspires.ftc.teamcode.Constants.Alliance;
 
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.hardware.SensorRevTOFDistance;
+import com.arcrobotics.ftclib.hardware.ServoEx;
+import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.Constants;
 
 /*
  * This file works in conjunction with the External Hardware Class sample called: ConceptExternalHardwareClass.java
@@ -72,13 +75,20 @@ public class hwMecanumFtclib {
     public Motor[] m_motors = null;
     public GamepadEx driverOp = null;
     public MecanumDrive drive = null;
-    public TouchSensor m_blueflag, m_redflag, m_elevstow, m_elevdown = null;
-    public Servo m_pixelservo = null;
+    public ServoEx m_pixelservo = null;
+
     public IMU imu = null;
 
     // Alliance Flag related stuff
     public DigitalChannel m_flag_a, m_flag_b = null;
     public Alliance alliance = Alliance.NONE;
+
+    // Manipulator related stuff
+    public Motor m_tilt_motor, m_extend_motor = null;
+    public DigitalChannel m_tilt_lim_low, m_tilt_lim_high, m_extend_lim_low, m_extend_lim_high = null;
+
+    // Distance sensor
+    public SensorRevTOFDistance m_distance = null;
 
     // Define Drive constants.  Make them public so they CAN be used by the calling OpMode
 
@@ -123,13 +133,44 @@ public class hwMecanumFtclib {
         }
 
         try {
-            //m_elevdown = hwMap.get(TouchSensor.class, "SW ELEV DOWN");
-            //m_elevstow = hwMap.get(TouchSensor.class, "SW ELEV STOW");
-            //m_blueflag = hwMap.get(TouchSensor.class, "SW BLUE FLAG");
-            //m_redflag = hwMap.get(TouchSensor.class, "SW RED FLAG");
-            //m_pixelservo = hwMap.get(Servo.class, "SRV PIXEL");
+            // Tilt (tilt)
+            m_tilt_lim_low = hwMap.get(DigitalChannel.class, "tilt sw low"); //normally closed
+            m_tilt_lim_high = hwMap.get(DigitalChannel.class, "tilt sw high"); //normally closed
+            m_tilt_motor = new Motor(hwMap, "tilt motor");
+            m_tilt_motor.setRunMode(Motor.RunMode.RawPower);
+            m_tilt_motor.setInverted(false);
+            m_tilt_motor.resetEncoder();
+        } catch(Exception e) {
+            myOpMode.telemetry.addLine("ERROR: Could not init Tilt");
+        }
+
+        try {
+            // Extend
+            m_extend_lim_low = hwMap.get(DigitalChannel.class, "ext sw low"); //normally closed
+            m_extend_lim_high = hwMap.get(DigitalChannel.class, "ext sw high"); //normally closed
+            m_extend_motor = new Motor(hwMap, "extend motor");
+            m_extend_motor.setRunMode(Motor.RunMode.RawPower);
+            m_extend_motor.setInverted(false);
+            m_extend_motor.resetEncoder();
+        } catch(Exception e) {
+            myOpMode.telemetry.addLine("ERROR: Could not init Extend");
+        }
+
+        try {
+            // Pixel Dropper
+            m_pixelservo = new SimpleServo(hwMap, "pixel servo", 0, 30);
+            m_pixelservo.setInverted(false);
+            setPixelPosition(Constants.PixelDropper.Positions.DOWN);
         } catch (Exception e) {
-            //splat!
+            myOpMode.telemetry.addLine("ERROR: Could not init Pixel Servo");
+        }
+
+        try {
+            // Distance Sensor
+            m_distance = new SensorRevTOFDistance(hwMap, "distance");
+        } catch (Exception e) {
+            myOpMode.telemetry.addLine("ERROR: Could not init Distance Sensor");
+
         }
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
@@ -169,10 +210,10 @@ public class hwMecanumFtclib {
         m_motor_fr.set(fr);
         m_motor_rl.set(rl);
         m_motor_rr.set(rr);
-        myOpMode.telemetry.addData("fl power","%.1f", fl);
-        myOpMode.telemetry.addData("fr power","%.1f", fr);
-        myOpMode.telemetry.addData("rl power","%.1f", rl);
-        myOpMode.telemetry.addData("rr power","%.1f", rr);
+//        myOpMode.telemetry.addData("fl power","%.1f", fl);
+//        myOpMode.telemetry.addData("fr power","%.1f", fr);
+//        myOpMode.telemetry.addData("rl power","%.1f", rl);
+//        myOpMode.telemetry.addData("rr power","%.1f", rr);
     }
 
     public void resetAllDriveEncoder() {
@@ -224,6 +265,46 @@ public class hwMecanumFtclib {
             myOpMode.telemetry.addLine("ERROR: Unable to determine alliance");
             return Alliance.NONE;
         }
+    }
+
+    // Tilt Methods
+    public boolean getTiltLowLimit() { return m_extend_lim_low.getState(); }
+    public boolean getTiltHighLimit() { return m_extend_lim_high.getState(); }
+    public void setTiltPower(double power) {
+        m_tilt_motor.set(power);
+    }
+    public void homeTilt() {
+        
+    }
+
+    // Extend Methods
+    public boolean getExtendLowLimit() { return m_extend_lim_low.getState(); }
+    public boolean getExtendHighLimit() { return m_extend_lim_high.getState(); }
+    public void homeExtend() {
+        if(m_extend_lim_low.getState()) m_extend_motor.set(-0.10);
+
+        
+    }
+    public void setExtendPower(double power) {
+        if(power < 0 && getExtendLowLimit()) {
+            myOpMode.telemetry.addLine("ERROR: Extend is at low limit");
+            power = 0;
+        }
+        if(power > 0 && getExtendHighLimit()) {
+            myOpMode.telemetry.addLine("ERROR: Extend is at high limit");
+            power = 0;
+        }
+        m_extend_motor.set(power);
+    }
+
+    // Pixel Dropper Methods
+    public void setPixelPosition(Constants.PixelDropper.Positions position) {
+        m_pixelservo.turnToAngle(position.getAngle());
+    }
+
+    // Distance Sensor Methods
+    public double getDistance() {
+        return m_distance.getDistance(DistanceUnit.INCH);
     }
 
 }

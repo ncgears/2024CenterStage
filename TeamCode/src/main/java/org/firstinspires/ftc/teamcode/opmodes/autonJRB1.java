@@ -23,6 +23,7 @@ public class autonJRB1 extends OpMode {
     AtomicBoolean check1 = new AtomicBoolean(false);
     AtomicBoolean check2 = new AtomicBoolean(true);
     StateMachine machine = null;
+    Constants.Manipulator.Positions m_manip_pos = Constants.Manipulator.Positions.START;
     Constants.Commands m_last_command = Constants.Commands.NONE;
     double m_last_command_time = 0.0;
 

@@ -92,7 +92,7 @@ public class Constants {
             public static double gearReduction = 20;
             public static double drumDiamInches = 1.3;
             public static double drumCircumferenceInches = drumDiamInches * Math.PI;
-            public static double ticksPerInch = ticksPerRev * gearReduction / drumCircumferenceInches;
+            public static double ticksPerInch = (ticksPerRev * gearReduction / drumCircumferenceInches) / 2; //2 stage elevator makes 2:1 reduction
             public static double targetThreshold = 0.5; //how many inches is close enough
             public static double targetThresholdTicks = targetThreshold * ticksPerInch;
             public static double kP = 0.0005;

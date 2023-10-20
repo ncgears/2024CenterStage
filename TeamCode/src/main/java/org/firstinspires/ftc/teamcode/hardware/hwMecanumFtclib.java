@@ -176,10 +176,10 @@ public class hwMecanumFtclib {
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-        m_motor_fl.setInverted(true);
-        m_motor_rl.setInverted(false);
-        m_motor_fr.setInverted(true);
-        m_motor_rr.setInverted(false);
+        m_motor_fl.setInverted(false);
+        m_motor_rl.setInverted(true);
+        m_motor_fr.setInverted(false);
+        m_motor_rr.setInverted(true);
 
         // Set the runmode for each motor
         for (Motor m : m_motors) {

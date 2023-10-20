@@ -27,10 +27,10 @@ public class fcMecanum extends OpMode {
     public void init() {
         driverOp = new GamepadEx(gamepad1);
         imu = hardwareMap.get(IMU.class, "imu");
-        m_motor_fl = new Motor(hardwareMap, "FL DRIVE");
-        m_motor_fr = new Motor(hardwareMap, "FR DRIVE");
-        m_motor_rl = new Motor(hardwareMap, "RL DRIVE");
-        m_motor_rr = new Motor(hardwareMap, "RR DRIVE");
+        m_motor_fl = new Motor(hardwareMap, "fl drive");
+        m_motor_fr = new Motor(hardwareMap, "fr drive");
+        m_motor_rl = new Motor(hardwareMap, "rl drive");
+        m_motor_rr = new Motor(hardwareMap, "rr drive");
         Motor[] m_motors = {m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr};
 
         // Define and Initialize Motors (note: need to use reference to actual OpMode).

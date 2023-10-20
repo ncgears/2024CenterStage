@@ -93,17 +93,17 @@ public class hwMecanum {
     public void init(HardwareMap ahwMap) {
         hwMap = ahwMap;
         // Define and Initialize Motors (note: need to use reference to actual OpMode).
-        m_motor_fl = hwMap.get(DcMotor.class, "FL DRIVE");
-        m_motor_fr = hwMap.get(DcMotor.class, "FR DRIVE");
-        m_motor_rl = hwMap.get(DcMotor.class, "RL DRIVE");
-        m_motor_rr = hwMap.get(DcMotor.class, "RR DRIVE");
+        m_motor_fl = hwMap.get(DcMotor.class, "fl drive");
+        m_motor_fr = hwMap.get(DcMotor.class, "fr drive");
+        m_motor_rl = hwMap.get(DcMotor.class, "rl drive");
+        m_motor_rr = hwMap.get(DcMotor.class, "rr drive");
         DcMotor[] m_motors = {m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr};
         imu = hwMap.get(IMU.class, "imu");
-        m_elevdown = hwMap.get(TouchSensor.class, "SW ELEV DOWN");
-        m_elevstow = hwMap.get(TouchSensor.class, "SW ELEV STOW");
-        m_blueflag = hwMap.get(TouchSensor.class, "SW BLUE FLAG");
-        m_redflag = hwMap.get(TouchSensor.class, "SW RED FLAG");
-        m_pixelservo = hwMap.get(Servo.class, "SRV PIXEL");
+//        m_elevdown = hwMap.get(TouchSensor.class, "sw tilt low");
+//        m_elevstow = hwMap.get(TouchSensor.class, "sw tilt high");
+//        m_blueflag = hwMap.get(TouchSensor.class, "SW BLUE FLAG");
+//        m_redflag = hwMap.get(TouchSensor.class, "SW RED FLAG");
+//        m_pixelservo = hwMap.get(Servo.class, "SRV PIXEL");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.

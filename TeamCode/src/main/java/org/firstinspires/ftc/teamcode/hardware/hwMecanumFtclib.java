@@ -111,10 +111,10 @@ public class hwMecanumFtclib {
         hwMap = ahwMap;
         // Define and Initialize Motors
         imu = hwMap.get(IMU.class, "imu");
-        m_motor_fl = new Motor(hwMap, "FL DRIVE");
-        m_motor_fr = new Motor(hwMap, "FR DRIVE");
-        m_motor_rl = new Motor(hwMap, "RL DRIVE");
-        m_motor_rr = new Motor(hwMap, "RR DRIVE");
+        m_motor_fl = new Motor(hwMap, "fl drive");
+        m_motor_fr = new Motor(hwMap, "fr drive");
+        m_motor_rl = new Motor(hwMap, "rl drive");
+        m_motor_rr = new Motor(hwMap, "rr drive");
         Motor[] m_motors = {m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr};
         drive = new MecanumDrive(m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr);
         // Gamepads

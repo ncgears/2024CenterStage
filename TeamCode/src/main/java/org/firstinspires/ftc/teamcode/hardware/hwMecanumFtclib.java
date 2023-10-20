@@ -84,8 +84,8 @@ public class hwMecanumFtclib {
     public Alliance alliance = Alliance.NONE;
 
     // Manipulator related stuff
-    public Motor m_tilt_motor, m_extend_motor = null;
-    public DigitalChannel m_tilt_lim_low, m_tilt_lim_high, m_extend_lim_low, m_extend_lim_high = null;
+    public Motor m_tilt_motor, m_elev_motor = null;
+    public DigitalChannel m_tilt_lim_low, m_tilt_lim_high, m_elev_lim_low, m_elev_lim_high = null;
 
     // Distance sensor
     public SensorRevTOFDistance m_distance = null;
@@ -146,14 +146,14 @@ public class hwMecanumFtclib {
 
         try {
             // Extend
-            m_extend_lim_low = hwMap.get(DigitalChannel.class, "ext sw low"); //normally closed
-            m_extend_lim_high = hwMap.get(DigitalChannel.class, "ext sw high"); //normally closed
-            m_extend_motor = new Motor(hwMap, "extend motor");
-            m_extend_motor.setRunMode(Motor.RunMode.RawPower);
-            m_extend_motor.setInverted(false);
-            m_extend_motor.resetEncoder();
+            m_elev_lim_low = hwMap.get(DigitalChannel.class, "elev sw low"); //normally closed
+            m_elev_lim_high = hwMap.get(DigitalChannel.class, "elev sw high"); //normally closed
+            m_elev_motor = new Motor(hwMap, "elev motor");
+            m_elev_motor.setRunMode(Motor.RunMode.RawPower);
+            m_elev_motor.setInverted(false);
+            m_elev_motor.resetEncoder();
         } catch(Exception e) {
-            myOpMode.telemetry.addLine("ERROR: Could not init Extend");
+            myOpMode.telemetry.addLine("ERROR: Could not init Elevator");
         }
 
         try {
@@ -268,8 +268,8 @@ public class hwMecanumFtclib {
     }
 
     // Tilt Methods
-    public boolean getTiltLowLimit() { return m_extend_lim_low.getState(); }
-    public boolean getTiltHighLimit() { return m_extend_lim_high.getState(); }
+    public boolean getTiltLowLimit() { return m_elev_lim_low.getState(); }
+    public boolean getTiltHighLimit() { return m_elev_lim_high.getState(); }
     public void setTiltPower(double power) {
         m_tilt_motor.set(power);
     }
@@ -278,10 +278,10 @@ public class hwMecanumFtclib {
     }
 
     // Extend Methods
-    public boolean getExtendLowLimit() { return m_extend_lim_low.getState(); }
-    public boolean getExtendHighLimit() { return m_extend_lim_high.getState(); }
+    public boolean getExtendLowLimit() { return m_elev_lim_low.getState(); }
+    public boolean getExtendHighLimit() { return m_elev_lim_high.getState(); }
     public void homeExtend() {
-        if(m_extend_lim_low.getState()) m_extend_motor.set(-0.10);
+        if(m_elev_lim_low.getState()) m_elev_motor.set(-0.10);
 
         
     }
@@ -294,7 +294,7 @@ public class hwMecanumFtclib {
             myOpMode.telemetry.addLine("ERROR: Extend is at high limit");
             power = 0;
         }
-        m_extend_motor.set(power);
+        m_elev_motor.set(power);
     }
 
     // Pixel Dropper Methods

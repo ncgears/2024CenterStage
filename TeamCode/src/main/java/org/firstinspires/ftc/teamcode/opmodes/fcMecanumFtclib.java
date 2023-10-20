@@ -174,7 +174,7 @@ public class fcMecanumFtclib extends OpMode {
     }
 
     public void moveExtend() {
-        double power = elevpid.update(robot.m_extend_motor.getCurrentPosition());
+        double power = elevpid.update(robot.m_elev_motor.getCurrentPosition());
         robot.setExtendPower(power);
     }
 

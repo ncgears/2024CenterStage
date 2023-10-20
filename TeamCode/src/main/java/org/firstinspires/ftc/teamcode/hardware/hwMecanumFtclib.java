@@ -193,7 +193,7 @@ public class hwMecanumFtclib {
 
         // Adjust the orientation parameters of the IMU
         IMU.Parameters imuParams = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
         imu.initialize(imuParams);
 

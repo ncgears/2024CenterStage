@@ -268,13 +268,13 @@ public class hwMecanumFtclib {
     }
 
     // Tilt Methods
-    public boolean getTiltLowLimit() { return m_elev_lim_low.getState(); }
-    public boolean getTiltHighLimit() { return m_elev_lim_high.getState(); }
+    public boolean getTiltLowLimit() { return m_tilt_lim_low.getState(); }
+    public boolean getTiltHighLimit() { return m_tilt_lim_high.getState(); }
     public void setTiltPower(double power) {
         m_tilt_motor.set(power);
     }
     public void homeTilt() {
-        if(m_tilt_lim_low.getState()) m_tilt_motor.set(-Constants.Manipulator.tiltController.homingSpeed);
+        if(!getTiltLowLimit()) m_tilt_motor.set(-Constants.Manipulator.tiltController.homingSpeed);
         else {
             m_tilt_motor.stopAndResetEncoder();
         }
@@ -284,7 +284,7 @@ public class hwMecanumFtclib {
     public boolean getElevatorLowLimit() { return m_elev_lim_low.getState(); }
     public boolean getElevatorHighLimit() { return m_elev_lim_high.getState(); }
     public void homeElevator() {
-        if(m_elev_lim_low.getState()) m_elev_motor.set(-Constants.Manipulator.elevatorController.homingSpeed);
+        if(!getElevatorLowLimit()) m_elev_motor.set(-Constants.Manipulator.elevatorController.homingSpeed);
         else {
             m_elev_motor.stopAndResetEncoder();
         }

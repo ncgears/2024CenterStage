@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Constants;
 
 public class pidTiltController {
-    private double targetAngle;
+    private double targetTicks;
     private double kP, kI, kD;
     private double accumulatedError = 0.0;
     private ElapsedTime timer = new ElapsedTime();
@@ -15,28 +15,32 @@ public class pidTiltController {
 
     public pidTiltController(OpMode opmode, double target, double p, double i, double d) {
         myOpMode = opmode;
-        targetAngle = target;
+        targetTicks = target;
         kP = p;
         kI = i;
         kD = d;
     }
-    public double update(double currentAngle) {
-        //P - Proportional - This determines the error that we will multiply by our constant to set power
-        double error = targetAngle - currentAngle;
-        error %= 360;
-        error += 360;
-        error %= 360;
-        if (error > 180) error -= 360;
 
+    /**
+     * The update function of the elevator controller returns a motor power for the elevator motor.
+     * @param currentTicks current encoder position of the elevator encoder
+     * @return motor power for the elevator motor
+     */
+    public double update(double currentTicks) {
+        //P - Proportional - This determines the error that we will multiply by our constant to set power
+        double error = targetTicks - currentTicks;
+//        myOpMode.telemetry.addData("drive error", "%.1f", error);
+//        RobotLog.d(String.format("drive error = %.2f", error));
+//        myOpMode.telemetry.update();
         //I - Integral - This accumulates the error over time to correct for not getting to the set point
         accumulatedError += error;
         //if we reach the threshold, reset accumulated error to stop adding it
-        if (atTarget(currentAngle)) {
+        if (atTarget(error)) {
             accumulatedError = 0;
         }
         accumulatedError = Math.abs(accumulatedError) * Math.signum(error);
 
-        //D - Derivative - This slows down the robot when its moving too rapidly
+        //D - Deriviative - This slows down the robot when its moving too rapidly
         double slope = 0.0;
         if (lastTime > 0) {
             slope = (error - lastError) / (timer.milliseconds() - lastTime);
@@ -50,31 +54,30 @@ public class pidTiltController {
         );
         return motorPower;
     }
+
     public double getTarget() {
-        return targetAngle;
+        return targetTicks;
     }
 
     public void setTargetPosition(Constants.Manipulator.Positions position) {
-        setTarget(position.getTilt());
+        setTarget(position.getElevator());
     }
 
-    public void setTarget(double degrees) {
-        double calcTarget = degrees;
-        if(calcTarget < Constants.Manipulator.tiltController.limits.minAngle) calcTarget = Constants.Manipulator.tiltController.limits.minAngle;
-        if(calcTarget > Constants.Manipulator.tiltController.limits.maxAngle) calcTarget = Constants.Manipulator.tiltController.limits.maxAngle;
-        targetAngle = calcTarget;
+    public void setTarget(double ticks) {
+        double calcTarget = ticks;
+        calcTarget = Math.max(calcTarget,Constants.Manipulator.tiltController.limits.minTicks); //make sure we are above min
+        calcTarget = Math.min(calcTarget,Constants.Manipulator.tiltController.limits.maxTicks); //make sure we are below max
+        targetTicks = calcTarget;
     }
 
     public double getLastError() {
         return lastError;
     }
 
-    public boolean atTarget(double currentAngle) {
-        double error = targetAngle - currentAngle;
-        error %= 360;
-        error += 360;
-        error %= 360;
-        if (error > 180) error -= 360;
-        return (Math.abs(error) < Constants.Manipulator.tiltController.targetThreshold);
+    public boolean atTarget(double error) {
+        return (Math.abs(error) < Constants.Manipulator.tiltController.targetThresholdTicks);
+    }
+    public boolean atTarget() {
+        return (Math.abs(lastError) < Constants.Manipulator.tiltController.targetThresholdTicks);
     }
 }

@@ -75,17 +75,13 @@ public class Constants {
         }
         public static class tiltController {
             public static double homingSpeed = 0.1; //speed for homing to limit
-            public static double targetThreshold = 0.5; //how many degrees is close enough
+            public static double targetThresholdTicks = 100; //how many encoder ticks is close enough
             public static double kP = 0.01;
             public static double kI = 0.0;
             public static double kD = 0.003;
             public static class limits {
-                public static double minAngle = 0.0; //Minimum angle of target (at limit sw) //this is -19 from horizontal floor plane
-                public static double maxAngle = 78.0; //Maximum angle of target (at limit sw)
-                public static double maxFloorPickupAngle = 10.0; //Maximum angle of floor pickup (extended position)
-                public static double transportAngle = 19.0; //This should be part of an enum for different positions;
-                public static double minScoringAngle = 50.6; //Lowest scoring position, just above bottom row of pixels;
-                public static double maxScoringAngle = 65.0; //Highest scoring position, just above row of pixels that cross top scoring line;
+                public static double minTicks = 0.0; //Minimum encoder ticks of target (at limit sw)
+                public static double maxTicks = 78.0; //Maximum encoder ticks of target (at limit sw)
             }
         }
         public static class elevatorController {
@@ -103,10 +99,6 @@ public class Constants {
             public static class limits {
                 public static double minLength = 0.0; //Minimum extended length of arm
                 public static double maxLength = 12.3; //Maximum extended length of arm
-                public static double maxFloorPickupLength = 1.0; //At max floor pickup angle, extended length
-                public static double minScoringLength = 1.9; //length at lowest scoring position
-                public static double transportLength = minScoringLength;
-                public static double maxScoringLength = 10.0; //length at highest scoring position
             }
         }
     }

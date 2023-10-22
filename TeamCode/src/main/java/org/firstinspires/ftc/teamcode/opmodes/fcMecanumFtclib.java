@@ -8,8 +8,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.hardware.hwMecanumFtclib;
 import org.firstinspires.ftc.teamcode.pidcontrollers.pidTurnControllerFtclib;
-import org.firstinspires.ftc.teamcode.pidcontrollers.pidTiltController;
 import org.firstinspires.ftc.teamcode.pidcontrollers.pidElevatorController;
+import org.firstinspires.ftc.teamcode.pidcontrollers.pidTiltController;
 
 @TeleOp(name="FC Mecanum HW", group="JRB")
 public class fcMecanumFtclib extends OpMode {
@@ -25,8 +25,8 @@ public class fcMecanumFtclib extends OpMode {
     double pid_turn_target = 0; //target degrees for pid turn
     boolean pid_turning = false; //tracking if we are using these pid controllers
     pidTurnControllerFtclib turnpid = new pidTurnControllerFtclib(this, pid_turn_target, Constants.Drivetrain.turnController.kP, Constants.Drivetrain.turnController.kI, Constants.Drivetrain.turnController.kD);
-    pidTiltController tiltpid = new pidTiltController(this, m_manip_pos.getAngle(), Constants.Manipulator.tiltController.kP, Constants.Manipulator.tiltController.kI, Constants.Manipulator.tiltController.kD);
-    pidElevatorController elevpid = new pidElevatorController(this, m_manip_pos.getLength(), Constants.Manipulator.elevatorController.kP, Constants.Manipulator.elevatorController.kI, Constants.Manipulator.elevatorController.kD);
+    pidTiltController tiltpid = new pidTiltController(this, m_manip_pos.getTilt(), Constants.Manipulator.tiltController.kP, Constants.Manipulator.tiltController.kI, Constants.Manipulator.tiltController.kD);
+    pidElevatorController elevpid = new pidElevatorController(this, m_manip_pos.getElevator(), Constants.Manipulator.elevatorController.kP, Constants.Manipulator.elevatorController.kI, Constants.Manipulator.elevatorController.kD);
 
     @Override
     public void init() {

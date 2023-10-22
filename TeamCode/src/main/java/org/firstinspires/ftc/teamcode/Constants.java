@@ -48,10 +48,10 @@ public class Constants {
      * elevator - This controls the length of the extended arm with the delivery bucket and ranges from 0 inches to 12.3 inches
      */
     public static class Manipulator {
-        public static enum Positions {
+        public enum Positions {
             //NAME(angle,length,distance)
-            //angle = (double) angle of the elevator, from the limit switch reference plane
-            //length = (double) length of the extend
+            //tilt = (double) position of the tilt, in encoder counts, from the low limit switch reference
+            //elevator = (double) length of the elevator, in inches
             //distance = (double) robot distance from backstage (-1 if not used)
             START(0.0,1.0,-1.0),
             TRANSPORT(18.0,0.0,-1.0),
@@ -63,14 +63,14 @@ public class Constants {
             CLIMB_READY(78.0,3.0,-1.0),
             CLIMB_UP(78.0,12.3,-1.0),
             CLIMB_LIFT(78.0,11.0,-1.0);
-            private final double angle, length, distance;
-            private Positions(double angle, double length, double distance) {
-                this.angle = angle;
-                this.length = length;
+            final double tilt, elevator, distance;
+            Positions(double tilt, double elevator, double distance) {
+                this.tilt = tilt;
+                this.elevator = elevator;
                 this.distance = distance;
             }
-            public double getAngle() { return this.angle; }
-            public double getLength() { return this.length; }
+            public double getTilt() { return this.tilt; }
+            public double getElevator() { return this.elevator; }
             public double getDistance() { return this.distance; }
         }
         public static class tiltController {

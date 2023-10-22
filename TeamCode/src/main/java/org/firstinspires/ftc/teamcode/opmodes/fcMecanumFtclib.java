@@ -126,7 +126,7 @@ public class fcMecanumFtclib extends OpMode {
 
         // Update the manipulator - these should be called every loop to make the manipulator move to target position
         moveElevator();
-        moveExtend();
+        moveTilt();
 
         // command name updates for telemetry
         if(m_last_command != "NONE" && runtime.seconds() - m_last_command_time > 2) { //reset the last command after 2 seconds
@@ -168,14 +168,14 @@ public class fcMecanumFtclib extends OpMode {
         pid_turn_target = targetAngle;
     }
 
-    public void moveElevator() {
+    public void moveTilt() {
         double power = tiltpid.update(robot.m_tilt_motor.getCurrentPosition());
         robot.setTiltPower(power);
     }
 
-    public void moveExtend() {
+    public void moveElevator() {
         double power = elevpid.update(robot.m_elev_motor.getCurrentPosition());
-        robot.setExtendPower(power);
+        robot.setElevatorPower(power);
     }
 
 }

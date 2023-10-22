@@ -285,7 +285,7 @@ public class hwMecanumFtclib {
 
         
     }
-    public void setExtendPower(double power) {
+    public void setElevatorPower(double power) {
         if(power < 0 && getExtendLowLimit()) {
             myOpMode.telemetry.addLine("ERROR: Extend is at low limit");
             power = 0;

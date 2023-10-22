@@ -60,7 +60,7 @@ public class pidElevatorController {
     }
 
     public void setTargetPosition(Constants.Manipulator.Positions position) {
-        setTargetInches(position.getLength());
+        setTargetInches(position.getElevator());
     }
 
     public void setTargetInches(double inches) {

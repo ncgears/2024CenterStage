@@ -55,7 +55,7 @@ public class pidTiltController {
     }
 
     public void setTargetPosition(Constants.Manipulator.Positions position) {
-        setTarget(position.getAngle());
+        setTarget(position.getTilt());
     }
 
     public void setTarget(double degrees) {

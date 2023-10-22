@@ -74,6 +74,7 @@ public class Constants {
             public double getDistance() { return this.distance; }
         }
         public static class tiltController {
+            public static double homingSpeed = 0.1; //speed for homing to limit
             public static double targetThreshold = 0.5; //how many degrees is close enough
             public static double kP = 0.01;
             public static double kI = 0.0;
@@ -88,6 +89,7 @@ public class Constants {
             }
         }
         public static class elevatorController {
+            public static double homingSpeed = 0.1; //speed for homing to limit
             public static double ticksPerRev = 28;
             public static double gearReduction = 20;
             public static double drumDiamInches = 1.3;

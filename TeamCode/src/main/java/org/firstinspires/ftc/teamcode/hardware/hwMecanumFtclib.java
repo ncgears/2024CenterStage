@@ -145,7 +145,7 @@ public class hwMecanumFtclib {
         }
 
         try {
-            // Extend
+            // Elevator
             m_elev_lim_low = hwMap.get(DigitalChannel.class, "elev sw low"); //normally closed
             m_elev_lim_high = hwMap.get(DigitalChannel.class, "elev sw high"); //normally closed
             m_elev_motor = new Motor(hwMap, "elev motor");
@@ -274,24 +274,28 @@ public class hwMecanumFtclib {
         m_tilt_motor.set(power);
     }
     public void homeTilt() {
-        
+        if(m_tilt_lim_low.getState()) m_tilt_motor.set(-Constants.Manipulator.tiltController.homingSpeed);
+        else {
+            m_tilt_motor.stopAndResetEncoder();
+        }
     }
 
-    // Extend Methods
-    public boolean getExtendLowLimit() { return m_elev_lim_low.getState(); }
-    public boolean getExtendHighLimit() { return m_elev_lim_high.getState(); }
-    public void homeExtend() {
-        if(m_elev_lim_low.getState()) m_elev_motor.set(-0.10);
-
-        
+    // Elevator Methods
+    public boolean getElevatorLowLimit() { return m_elev_lim_low.getState(); }
+    public boolean getElevatorHighLimit() { return m_elev_lim_high.getState(); }
+    public void homeElevator() {
+        if(m_elev_lim_low.getState()) m_elev_motor.set(-Constants.Manipulator.elevatorController.homingSpeed);
+        else {
+            m_elev_motor.stopAndResetEncoder();
+        }
     }
     public void setElevatorPower(double power) {
-        if(power < 0 && getExtendLowLimit()) {
-            myOpMode.telemetry.addLine("ERROR: Extend is at low limit");
+        if(power < 0 && getElevatorLowLimit()) {
+            myOpMode.telemetry.addLine("ERROR: Elevator is at low limit");
             power = 0;
         }
-        if(power > 0 && getExtendHighLimit()) {
-            myOpMode.telemetry.addLine("ERROR: Extend is at high limit");
+        if(power > 0 && getElevatorHighLimit()) {
+            myOpMode.telemetry.addLine("ERROR: Elevator is at high limit");
             power = 0;
         }
         m_elev_motor.set(power);

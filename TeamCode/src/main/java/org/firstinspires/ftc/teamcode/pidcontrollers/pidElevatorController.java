@@ -7,18 +7,19 @@ import org.firstinspires.ftc.teamcode.Constants;
 
 public class pidElevatorController {
     private double targetTicks;
-    private double kP, kI, kD;
+    private double kP, kI, kD, kF;
     private double accumulatedError = 0.0;
     private ElapsedTime timer = new ElapsedTime();
     private double lastError, lastTime = 0.0;
     private OpMode myOpMode = null;
 
-    public pidElevatorController(OpMode opmode, double target, double p, double i, double d) {
+    public pidElevatorController(OpMode opmode, double target, double p, double i, double d, double f) {
         myOpMode = opmode;
         targetTicks = target;
         kP = p;
         kI = i;
         kD = d;
+        kF = f;
     }
 
     /**
@@ -38,9 +39,10 @@ public class pidElevatorController {
         if (atTarget(error)) {
             accumulatedError = 0;
         }
-        accumulatedError = Math.abs(accumulatedError) * Math.signum(error);
+//        accumulatedError = Math.abs(accumulatedError) * Math.signum(error);
+        accumulatedError = accumulatedError + (error * (timer.milliseconds() - lastTime));
 
-        //D - Deriviative - This slows down the robot when its moving too rapidly
+        //D - Derivative - This slows down the robot when its moving too rapidly
         double slope = 0.0;
         if (lastTime > 0) {
             slope = (error - lastError) / (timer.milliseconds() - lastTime);
@@ -49,7 +51,7 @@ public class pidElevatorController {
         lastError = error;
 
         //Motor Power calculation
-        double motorPower = 0.1 * Math.signum(error) + 0.9 * Math.tanh(
+        double motorPower = kF * Math.signum(error) + (1.0 - kF) * Math.tanh(
                 (kP * error) + (kI * accumulatedError) + (kD * slope)
         );
         return motorPower;

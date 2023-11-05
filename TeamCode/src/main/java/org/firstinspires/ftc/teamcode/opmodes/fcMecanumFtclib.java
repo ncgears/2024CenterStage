@@ -25,8 +25,8 @@ public class fcMecanumFtclib extends OpMode {
     double pid_turn_target = 0; //target degrees for pid turn
     boolean pid_turning = false; //tracking if we are using these pid controllers
     pidTurnControllerFtclib turnpid = new pidTurnControllerFtclib(this, pid_turn_target, Constants.Drivetrain.turnController.kP, Constants.Drivetrain.turnController.kI, Constants.Drivetrain.turnController.kD);
-    pidTiltController tiltpid = new pidTiltController(this, m_manip_pos.getTilt(), Constants.Manipulator.tiltController.kP, Constants.Manipulator.tiltController.kI, Constants.Manipulator.tiltController.kD);
-    pidElevatorController elevpid = new pidElevatorController(this, m_manip_pos.getElevator(), Constants.Manipulator.elevatorController.kP, Constants.Manipulator.elevatorController.kI, Constants.Manipulator.elevatorController.kD);
+    pidTiltController tiltpid = new pidTiltController(this, m_manip_pos.getTilt(), Constants.Manipulator.tiltController.kP, Constants.Manipulator.tiltController.kI, Constants.Manipulator.tiltController.kD, Constants.Manipulator.tiltController.kF);
+    pidElevatorController elevpid = new pidElevatorController(this, m_manip_pos.getElevator(), Constants.Manipulator.elevatorController.kP, Constants.Manipulator.elevatorController.kI, Constants.Manipulator.elevatorController.kD, Constants.Manipulator.elevatorController.kF);
 
     @Override
     public void init() {
@@ -38,12 +38,7 @@ public class fcMecanumFtclib extends OpMode {
     public void init_loop() {
         if(m_last_command == "NONE" && robot.alliance == Constants.Alliance.NONE) telemCommand("DETERMINE TEAM"); //determine team and store it
         // always listen for gyro reset button
-        if(robot.driverOp.getButton(GamepadKeys.Button.BACK)) {
-            robot.imu.resetYaw();
-            telemCommand("RESET GYRO");
-        }
-        // always listen for gyro reset button
-        if(robot.driverOp.getButton(GamepadKeys.Button.BACK)) {
+        if(robot.driverOp.getButton(GamepadKeys.Button.BACK) && runtime.seconds() - m_last_command_time > 0.5) {
             robot.imu.resetYaw();
             telemCommand("RESET GYRO");
         }
@@ -52,11 +47,7 @@ public class fcMecanumFtclib extends OpMode {
             telemCommand("NONE");
         }
         // Update all telemetry data
-        telemetry.addData("Alliance", robot.alliance.toString());
-        telemetry.addData("Last Command", m_last_command.toString());
-        telemetry.addData("Robot Heading", "%.2f", robot.getRobotYaw());
-        telemetry.addData("Obstacle Distance", "%.2f Inches", robot.getDistance());
-        telemetry.addData("Manipulator Position", m_manip_pos.toString());
+        telem(true);
     }
 
     // driver presses start
@@ -133,16 +124,7 @@ public class fcMecanumFtclib extends OpMode {
             telemCommand("NONE");
         }
         // Update all telemetry data
-        telemetry.addData("Alliance", robot.alliance.toString());
-        telemetry.addData("OpMode", "Run Time: %.2f", runtime.seconds());
-        telemetry.addData("Last Command", m_last_command.toString());
-        telemetry.addData("Robot Heading", "%.2f", robot.getRobotYaw());
-        telemetry.addData("Obstacle Distance", "%.2f Inches", robot.getDistance());
-        telemetry.addData("Manipulator Position", m_manip_pos.toString());
-        telemetry.addData("Robot Drive", "fwd=%.2f, str=%.2f, turn=%.2f", drive_fwd, drive_strafe, drive_turn);
-//        if(pid_driving) telemetry.addData("PID Drive", "target=%.0f, error=%.0f", pid_drive_target, drivepid.getLastError());
-        if(pid_turning) telemetry.addData("PID Turn", "target=%.0f, error=%.0f", pid_turn_target, turnpid.getLastError());
-        //telemetry.update(); //this is called automatically every loop
+        telem(false);
     }
 
     public void telemCommand(String command) {
@@ -169,13 +151,34 @@ public class fcMecanumFtclib extends OpMode {
     }
 
     public void moveTilt() {
-        double power = tiltpid.update(robot.m_tilt_motor.getCurrentPosition());
+        tiltpid.setTargetPosition(m_manip_pos);
+        double power = tiltpid.update(robot.getTiltPosition());
         robot.setTiltPower(power);
     }
 
     public void moveElevator() {
-        double power = elevpid.update(robot.m_elev_motor.getCurrentPosition());
+        elevpid.setTargetPosition(m_manip_pos);
+        double power = elevpid.update(robot.getElevatorPosition());
         robot.setElevatorPower(power);
+    }
+
+    private void telem(boolean idle) {
+        telemetry.addData("Alliance", robot.alliance.toString());
+        telemetry.addData("Last Command", m_last_command.toString());
+        telemetry.addData("Robot Heading", "%.2f", robot.getRobotYaw());
+        telemetry.addData("Obstacle Distance", "%.2f Inches", robot.getDistance());
+        telemetry.addData("Pixel Dropper", robot.getPixelPosition().toString());
+        telemetry.addData("Manipulator Position", m_manip_pos.toString());
+        telemetry.addData("Tilt", "lim=%s, tgt=%.0f, pos=%d, pwr=%.2f", robot.getTiltLimitString(), tiltpid.getTarget(), robot.getTiltPosition(), robot.getTiltPower());
+        telemetry.addData("Elev", "lim=%s, tgt=%.0f, pos=%d, pwr=%.2f", robot.getElevatorLimitString(), elevpid.getTarget(), robot.getElevatorPosition(), robot.getElevatorPower());
+        if(idle) { //items that are only in idle
+        } else {
+            telemetry.addData("OpMode", "Run Time: %.2f", runtime.seconds());
+            telemetry.addData("Robot Drive", "fwd=%.2f, str=%.2f, turn=%.2f", drive_fwd, drive_strafe, drive_turn);
+//        if(pid_driving) telemetry.addData("PID Drive", "target=%.0f, error=%.0f", pid_drive_target, drivepid.getLastError());
+            if(pid_turning) telemetry.addData("PID Turn", "target=%.0f, error=%.0f", pid_turn_target, turnpid.getLastError());
+        }
+        //telemetry.update(); //this is called automatically every loop
     }
 
 }

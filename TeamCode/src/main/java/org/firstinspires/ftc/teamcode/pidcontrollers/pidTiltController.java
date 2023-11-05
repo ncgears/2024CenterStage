@@ -7,18 +7,19 @@ import org.firstinspires.ftc.teamcode.Constants;
 
 public class pidTiltController {
     private double targetTicks;
-    private double kP, kI, kD;
+    private double kP, kI, kD, kF;
     private double accumulatedError = 0.0;
     private ElapsedTime timer = new ElapsedTime();
     private double lastError, lastTime = 0.0;
     private OpMode myOpMode = null;
 
-    public pidTiltController(OpMode opmode, double target, double p, double i, double d) {
+    public pidTiltController(OpMode opmode, double target, double p, double i, double d, double f) {
         myOpMode = opmode;
         targetTicks = target;
         kP = p;
         kI = i;
         kD = d;
+        kF = f;
     }
 
     /**
@@ -29,16 +30,12 @@ public class pidTiltController {
     public double update(double currentTicks) {
         //P - Proportional - This determines the error that we will multiply by our constant to set power
         double error = targetTicks - currentTicks;
-//        myOpMode.telemetry.addData("drive error", "%.1f", error);
-//        RobotLog.d(String.format("drive error = %.2f", error));
-//        myOpMode.telemetry.update();
         //I - Integral - This accumulates the error over time to correct for not getting to the set point
         accumulatedError += error;
-        //if we reach the threshold, reset accumulated error to stop adding it
-        if (atTarget(error)) {
+        accumulatedError = accumulatedError + (error * (timer.milliseconds() - lastTime));
+        if (atTarget(error)) { //if we reach the threshold, reset accumulated error to stop adding it
             accumulatedError = 0;
         }
-        accumulatedError = Math.abs(accumulatedError) * Math.signum(error);
 
         //D - Deriviative - This slows down the robot when its moving too rapidly
         double slope = 0.0;
@@ -49,7 +46,7 @@ public class pidTiltController {
         lastError = error;
 
         //Motor Power calculation
-        double motorPower = 0.1 * Math.signum(error) + 0.9 * Math.tanh(
+        double motorPower = kF * Math.signum(error) + (1.0 - kF) * Math.tanh(
                 (kP * error) + (kI * accumulatedError) + (kD * slope)
         );
         return motorPower;
@@ -60,7 +57,7 @@ public class pidTiltController {
     }
 
     public void setTargetPosition(Constants.Manipulator.Positions position) {
-        setTarget(position.getElevator());
+        setTarget(position.getTilt());
     }
 
     public void setTarget(double ticks) {

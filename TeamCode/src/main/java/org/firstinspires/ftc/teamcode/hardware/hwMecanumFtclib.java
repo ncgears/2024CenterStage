@@ -87,6 +87,9 @@ public class hwMecanumFtclib {
     public Motor m_tilt_motor, m_elev_motor = null;
     public DigitalChannel m_tilt_lim_low, m_tilt_lim_high, m_elev_lim_low, m_elev_lim_high = null;
 
+    // Pixel Dropper related stuff
+    public Constants.PixelDropper.Positions m_pixel_position = null;
+
     // Distance sensor
     public SensorRevTOFDistance m_distance = null;
 
@@ -138,7 +141,11 @@ public class hwMecanumFtclib {
             m_tilt_lim_high = hwMap.get(DigitalChannel.class, "tilt sw high"); //normally closed
             m_tilt_motor = new Motor(hwMap, "tilt motor");
             m_tilt_motor.setRunMode(Motor.RunMode.RawPower);
-            m_tilt_motor.setInverted(false);
+            m_tilt_motor.setInverted(true);
+//            while (getTiltLowLimit()) {
+//                m_tilt_motor.set(-Constants.Manipulator.tiltController.homingSpeed);
+//            }
+//            m_tilt_motor.set(0);
             m_tilt_motor.resetEncoder();
         } catch(Exception e) {
             myOpMode.telemetry.addLine("ERROR: Could not init Tilt");
@@ -150,7 +157,7 @@ public class hwMecanumFtclib {
             m_elev_lim_high = hwMap.get(DigitalChannel.class, "elev sw high"); //normally closed
             m_elev_motor = new Motor(hwMap, "elev motor");
             m_elev_motor.setRunMode(Motor.RunMode.RawPower);
-            m_elev_motor.setInverted(false);
+            m_elev_motor.setInverted(true);
             m_elev_motor.resetEncoder();
         } catch(Exception e) {
             myOpMode.telemetry.addLine("ERROR: Could not init Elevator");
@@ -177,9 +184,9 @@ public class hwMecanumFtclib {
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
         m_motor_fl.setInverted(false);
-        m_motor_rl.setInverted(true);
+        m_motor_rl.setInverted(false);
         m_motor_fr.setInverted(false);
-        m_motor_rr.setInverted(true);
+        m_motor_rr.setInverted(false);
 
         // Set the runmode for each motor
         for (Motor m : m_motors) {
@@ -268,8 +275,16 @@ public class hwMecanumFtclib {
     }
 
     // Tilt Methods
+    public int getTiltPosition() { return m_tilt_motor.getCurrentPosition(); }
+    public double getTiltPower() { return m_tilt_motor.get(); }
     public boolean getTiltLowLimit() { return m_tilt_lim_low.getState(); }
     public boolean getTiltHighLimit() { return m_tilt_lim_high.getState(); }
+    public String getTiltLimitString() {
+        String lim = "";
+        lim += (getTiltLowLimit()) ? "L" : "";
+        lim += (getTiltHighLimit()) ? "H" : "";
+        return (lim=="") ? "O" : lim;
+    }
     public void setTiltPower(double power) {
         m_tilt_motor.set(power);
     }
@@ -281,8 +296,16 @@ public class hwMecanumFtclib {
     }
 
     // Elevator Methods
+    public int getElevatorPosition() { return m_elev_motor.getCurrentPosition(); }
+    public double getElevatorPower() { return m_elev_motor.get(); }
     public boolean getElevatorLowLimit() { return m_elev_lim_low.getState(); }
     public boolean getElevatorHighLimit() { return m_elev_lim_high.getState(); }
+    public String getElevatorLimitString() {
+        String lim = "";
+        lim += (getElevatorLowLimit()) ? "L" : "";
+        lim += (getElevatorHighLimit()) ? "H" : "";
+        return (lim=="") ? "O" : lim;
+    }
     public void homeElevator() {
         if(!getElevatorLowLimit()) m_elev_motor.set(-Constants.Manipulator.elevatorController.homingSpeed);
         else {
@@ -303,7 +326,11 @@ public class hwMecanumFtclib {
 
     // Pixel Dropper Methods
     public void setPixelPosition(Constants.PixelDropper.Positions position) {
+        m_pixel_position = position;
         m_pixelservo.turnToAngle(position.getAngle());
+    }
+    public Constants.PixelDropper.Positions getPixelPosition() {
+        return m_pixel_position;
     }
 
     // Distance Sensor Methods

@@ -90,7 +90,8 @@ public class autonJRB1 extends OpMode {
     @Override
     public void init_loop() {
         if(m_last_command == Constants.Commands.NONE && robot.alliance == Constants.Alliance.NONE) runCommand(Constants.Commands.DETERMINE_TEAM); //determine team
-        if(robot.driverOp.getButton(GamepadKeys.Button.BACK)) runCommand(Constants.Commands.GYRO_RESET); //listen for gyro reset request
+        if(robot.driverOp.getButton(GamepadKeys.Button.BACK) && runtime.seconds() - m_last_command_time > 1) runCommand(Constants.Commands.GYRO_RESET); //listen for gyro reset request
+        if(robot.driverOp.getButton(GamepadKeys.Button.START) && runtime.seconds() - m_last_command_time > 1) runCommand(Constants.Commands.TOGGLE_PIXEL);
         if(m_last_command != Constants.Commands.NONE && runtime.seconds() - m_last_command_time > 2) { //reset the last command after 2 seconds
             runCommand(Constants.Commands.NONE);
         }
@@ -99,6 +100,9 @@ public class autonJRB1 extends OpMode {
         telemetry.addData("TSE Location", m_tse.toString());
         telemetry.addData("Last Command", m_last_command.toString());
         telemetry.addData("Robot Heading", "%.2f", robot.getRobotYaw());
+        telemetry.addData("Pixel Dropper", robot.getPixelPosition().toString());
+        telemetry.addData("Tilt Position", robot.getTiltPosition());
+        telemetry.addData("Elevator Position", robot.getElevatorPosition());
     }
 
     // driver presses start
@@ -134,6 +138,9 @@ public class autonJRB1 extends OpMode {
         telemetry.addData("Last Command", m_last_command.toString());
         telemetry.addData("Robot State", machine.getState().toString());
         telemetry.addData("Robot Heading", "%.2f", robot.getRobotYaw());
+        telemetry.addData("Pixel Dropper", robot.getPixelPosition().toString());
+        telemetry.addData("Tilt Position", robot.getTiltPosition());
+        telemetry.addData("Elevator Position", robot.getElevatorPosition());
         telemetry.addData("Robot Drive", "fwd=%.2f, str=%.2f, turn=%.2f", drive_fwd, drive_strafe, drive_turn);
         if(pid_driving) telemetry.addData("PID Drive", "target=%.0f, error=%.0f", pid_drive_target, drivepid.getLastError());
         if(pid_turning) telemetry.addData("PID Turn", "target=%.0f, error=%.0f", pid_turn_target, turnpid.getLastError());
@@ -166,6 +173,12 @@ public class autonJRB1 extends OpMode {
             case GYRO_RESET:
                 robot.imu.resetYaw();
                 break;
+            case TOGGLE_PIXEL:
+                if(robot.getPixelPosition() == Constants.PixelDropper.Positions.DOWN) {
+                    robot.setPixelPosition(Constants.PixelDropper.Positions.UP);
+                } else {
+                    robot.setPixelPosition(Constants.PixelDropper.Positions.DOWN);
+                }
             case DETERMINE_TEAM:
                 robot.alliance = robot.determineAlliance();
                 break;

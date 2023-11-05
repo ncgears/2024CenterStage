@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 public class Constants {
-    public enum Commands { NONE, ROBOT_RESET, GYRO_RESET, DETERMINE_TEAM, PID_TURN_0, PID_TURN_90, PID_TURN_N90, PID_TURN_180 }
+    public enum Commands { NONE, ROBOT_RESET, GYRO_RESET, TOGGLE_PIXEL, DETERMINE_TEAM, PID_TURN_0, PID_TURN_90, PID_TURN_N90, PID_TURN_180 }
     public enum Alliance { RED, BLUE, NONE }
     public enum TSELocation { LEFT, MIDDLE, RIGHT, NONE }
     public static class Global {
@@ -53,16 +53,16 @@ public class Constants {
             //tilt = (double) position of the tilt, in encoder counts, from the low limit switch reference
             //elevator = (double) length of the elevator, in inches
             //distance = (double) robot distance from backstage (-1 if not used)
-            START(0.0,1.0,-1.0),
-            TRANSPORT(18.0,0.0,-1.0),
-            FLOOR_CLOSE(0.0,1.0,-1.0),
-            FLOOR_FAR(3.0,2.0,-1.0),
-            FLOOR_DESTACK(3.2,2.0,-1.0),
-            SCORE_ROW1(49.6,1.9,0.0),
+            START(0,1.0,-1.0),
+            TRANSPORT(275,3.0,-1.0),
+            FLOOR_CLOSE(0,1.0,-1.0),
+            FLOOR_FAR(100,2.0,-1.0),
+            FLOOR_DESTACK(100,2.0,-1.0),
+            SCORE_ROW1(675,10,0.0),
             //SCORE_ROWX(78.0,12.3,0.0),
-            CLIMB_READY(78.0,3.0,-1.0),
-            CLIMB_UP(78.0,12.3,-1.0),
-            CLIMB_LIFT(78.0,11.0,-1.0);
+            CLIMB_READY(1230,3.0,-1.0),
+            CLIMB_UP(1230,12.3,-1.0),
+            CLIMB_LIFT(1230,11.0,-1.0);
             final double tilt, elevator, distance;
             Positions(double tilt, double elevator, double distance) {
                 this.tilt = tilt;
@@ -75,13 +75,14 @@ public class Constants {
         }
         public static class tiltController {
             public static double homingSpeed = 0.1; //speed for homing to limit
-            public static double targetThresholdTicks = 100; //how many encoder ticks is close enough
-            public static double kP = 0.01;
-            public static double kI = 0.0;
-            public static double kD = 0.003;
+            public static double targetThresholdTicks = 5; //how many encoder ticks is close enough
+            public static double kF = 0.0; //5; //minimum power to move the motor
+            public static double kP = 0.0025; //0.0025
+            public static double kI = 0.0000033; //0.000003
+            public static double kD = 0.002; //0.002
             public static class limits {
                 public static double minTicks = 0.0; //Minimum encoder ticks of target (at limit sw)
-                public static double maxTicks = 78.0; //Maximum encoder ticks of target (at limit sw)
+                public static double maxTicks = 1220.0; //Maximum encoder ticks of target (at limit sw)
             }
         }
         public static class elevatorController {
@@ -91,11 +92,12 @@ public class Constants {
             public static double drumDiamInches = 1.3;
             public static double drumCircumferenceInches = drumDiamInches * Math.PI;
             public static double ticksPerInch = (ticksPerRev * gearReduction / drumCircumferenceInches) / 2; //2 stage elevator makes 2:1 reduction
-            public static double targetThreshold = 0.5; //how many inches is close enough
-            public static double targetThresholdTicks = targetThreshold * ticksPerInch;
-            public static double kP = 0.0005;
-            public static double kI = 0.0;
-            public static double kD = 0.003;
+            public static double targetThreshold = 0.2; //how many inches is close enough
+            public static double targetThresholdTicks = 5; //targetThreshold * ticksPerInch;
+            public static double kF = 0.0; //5; //minimum power to move the motor
+            public static double kP = 0.0025; //0025
+            public static double kI = 0.000003; //000002
+            public static double kD = 0.002; //002
             public static class limits {
                 public static double minLength = 0.0; //Minimum extended length of arm
                 public static double maxLength = 12.3; //Maximum extended length of arm

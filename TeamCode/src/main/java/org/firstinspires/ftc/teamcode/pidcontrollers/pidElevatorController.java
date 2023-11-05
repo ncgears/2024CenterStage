@@ -71,8 +71,11 @@ public class pidElevatorController {
 
     public void setTarget(double ticks) {
         double calcTarget = ticks;
-        if(calcTarget < Constants.Manipulator.elevatorController.limits.minLength * Constants.Manipulator.elevatorController.ticksPerInch) calcTarget = Constants.Manipulator.elevatorController.limits.minLength * Constants.Manipulator.elevatorController.ticksPerInch;
-        if(calcTarget > Constants.Manipulator.elevatorController.limits.maxLength * Constants.Manipulator.elevatorController.ticksPerInch) calcTarget = Constants.Manipulator.elevatorController.limits.maxLength * Constants.Manipulator.elevatorController.ticksPerInch;
+        calcTarget = Math.max(calcTarget,Constants.Manipulator.elevatorController.limits.minLength * Constants.Manipulator.elevatorController.ticksPerInch); //make sure we are above min
+        calcTarget = Math.min(calcTarget,Constants.Manipulator.elevatorController.limits.maxLength * Constants.Manipulator.elevatorController.ticksPerInch); //make sure we are below max
+
+        //second sanity check for hardcoded maxTicks
+        calcTarget = Math.min(calcTarget, Constants.Manipulator.elevatorController.limits.maxTicks);
         targetTicks = calcTarget;
     }
 

@@ -93,14 +93,15 @@ public class Constants {
             public static double drumCircumferenceInches = drumDiamInches * Math.PI;
             public static double ticksPerInch = (ticksPerRev * gearReduction / drumCircumferenceInches) / 2; //2 stage elevator makes 2:1 reduction
             public static double targetThreshold = 0.2; //how many inches is close enough
-            public static double targetThresholdTicks = 5; //targetThreshold * ticksPerInch;
-            public static double kF = 0.0; //5; //minimum power to move the motor
-            public static double kP = 0.0025; //0025
-            public static double kI = 0.000003; //000002
+            public static double targetThresholdTicks = 10; //targetThreshold * ticksPerInch;
+            public static double kF = 0.0; //0.0; //minimum power to move the motor
+            public static double kP = 0.0035; //0025
+            public static double kI = 0.000006; //000002
             public static double kD = 0.002; //002
             public static class limits {
                 public static double minLength = 0.0; //Minimum extended length of arm
-                public static double maxLength = 12.3; //Maximum extended length of arm
+                public static double maxLength = 24.6; //Maximum extended length of arm
+                public static double maxTicks = 1610;
             }
         }
     }

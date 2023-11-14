@@ -141,7 +141,7 @@ public class hwMecanumFtclib {
             m_tilt_lim_high = hwMap.get(DigitalChannel.class, "tilt sw high"); //normally closed
             m_tilt_motor = new Motor(hwMap, "tilt motor");
             m_tilt_motor.setRunMode(Motor.RunMode.RawPower);
-            m_tilt_motor.setInverted(true);
+            m_tilt_motor.setInverted(false);
 //            while (getTiltLowLimit()) {
 //                m_tilt_motor.set(-Constants.Manipulator.tiltController.homingSpeed);
 //            }
@@ -157,7 +157,7 @@ public class hwMecanumFtclib {
             m_elev_lim_high = hwMap.get(DigitalChannel.class, "elev sw high"); //normally closed
             m_elev_motor = new Motor(hwMap, "elev motor");
             m_elev_motor.setRunMode(Motor.RunMode.RawPower);
-            m_elev_motor.setInverted(true);
+            m_elev_motor.setInverted(false);
             m_elev_motor.resetEncoder();
         } catch(Exception e) {
             myOpMode.telemetry.addLine("ERROR: Could not init Elevator");
@@ -298,8 +298,8 @@ public class hwMecanumFtclib {
     // Elevator Methods
     public int getElevatorPosition() { return m_elev_motor.getCurrentPosition(); }
     public double getElevatorPower() { return m_elev_motor.get(); }
-    public boolean getElevatorLowLimit() { return m_elev_lim_low.getState(); }
-    public boolean getElevatorHighLimit() { return m_elev_lim_high.getState(); }
+    public boolean getElevatorLowLimit() { return !m_elev_lim_low.getState(); }
+    public boolean getElevatorHighLimit() { return !m_elev_lim_high.getState(); }
     public String getElevatorLimitString() {
         String lim = "";
         lim += (getElevatorLowLimit()) ? "L" : "";

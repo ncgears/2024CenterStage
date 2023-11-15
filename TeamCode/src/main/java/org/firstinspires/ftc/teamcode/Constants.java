@@ -53,12 +53,15 @@ public class Constants {
             //tilt = (double) position of the tilt, in encoder counts, from the low limit switch reference
             //elevator = (double) length of the elevator, in inches
             //distance = (double) robot distance from backstage (-1 if not used)
-            START(0,1.0,-1.0),
-            TRANSPORT(275,3.0,-1.0),
-            FLOOR_CLOSE(0,1.0,-1.0),
+            START(10,0.0,-1.0),
+            TRANSPORT(555,3.0,-1.0),
+            FLOOR_CLOSE(0,0.0,-1.0),
             FLOOR_FAR(100,2.0,-1.0),
             FLOOR_DESTACK(100,2.0,-1.0),
-            SCORE_ROW1(675,10,0.0),
+            SCORE_DROP1(775,10,0.0),
+            SCORE_ROW1(975,10,0.0),
+            SCORE_ROW2(975,11,0.0),
+            SCORE_ROW3(975,12,0.0),
             //SCORE_ROWX(78.0,12.3,0.0),
             CLIMB_READY(1230,3.0,-1.0),
             CLIMB_UP(1230,12.3,-1.0),

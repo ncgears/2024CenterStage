@@ -110,6 +110,9 @@ public class fcMecanumFtclib extends OpMode {
         } else if (robot.driverOp.getButton(GamepadKeys.Button.X)) { //transport
             m_manip_pos = Constants.Manipulator.Positions.TRANSPORT;
             telemCommand("TRANSPORT POSITION");
+        } else if (robot.driverOp.getButton(GamepadKeys.Button.B)) { //transport
+            m_manip_pos = Constants.Manipulator.Positions.SCORE_DROP1;
+            telemCommand("TRANSPORT POSITION");
         } else if (robot.driverOp.getButton(GamepadKeys.Button.A)) { //floor pickup
             m_manip_pos = Constants.Manipulator.Positions.FLOOR_CLOSE;
             telemCommand("FLOOR PICKUP");

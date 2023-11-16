@@ -54,6 +54,10 @@ public class pidElevatorController {
         double motorPower = kF * Math.signum(error) + (1.0 - kF) * Math.tanh(
                 (kP * error) + (kI * accumulatedError) + (kD * slope)
         );
+
+        //Limit output to max value
+        motorPower = Math.min(Math.abs(motorPower),Constants.Manipulator.elevatorController.limits.maxOutput) * Math.signum(motorPower);
+
         return motorPower;
     }
 

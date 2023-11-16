@@ -55,7 +55,7 @@ public class Constants {
             //distance = (double) robot distance from backstage (-1 if not used)
             START(10,0.0,-1.0),
             TRANSPORT(555,3.0,-1.0),
-            FLOOR_CLOSE(0,0.0,-1.0),
+            FLOOR_CLOSE(10,0.0,-1.0),
             FLOOR_FAR(100,2.0,-1.0),
             FLOOR_DESTACK(100,2.0,-1.0),
             SCORE_DROP1(775,10,0.0),
@@ -78,12 +78,13 @@ public class Constants {
         }
         public static class tiltController {
             public static double homingSpeed = 0.1; //speed for homing to limit
-            public static double targetThresholdTicks = 5; //how many encoder ticks is close enough
+            public static double targetThresholdTicks = 10; //how many encoder ticks is close enough
             public static double kF = 0.0; //5; //minimum power to move the motor
-            public static double kP = 0.0025; //0.0025
-            public static double kI = 0.0000033; //0.000003
+            public static double kP = 0.0015; //0.0025
+            public static double kI = 0.0000015; //0.0000035
             public static double kD = 0.002; //0.002
             public static class limits {
+                public static double maxOutput = 0.60; //maximum output power
                 public static double minTicks = 0.0; //Minimum encoder ticks of target (at limit sw)
                 public static double maxTicks = 1220.0; //Maximum encoder ticks of target (at limit sw)
             }
@@ -102,6 +103,7 @@ public class Constants {
             public static double kI = 0.000006; //000002
             public static double kD = 0.002; //002
             public static class limits {
+                public static double maxOutput = 0.60; //maximum output power
                 public static double minLength = 0.0; //Minimum extended length of arm
                 public static double maxLength = 24.6; //Maximum extended length of arm
                 public static double maxTicks = 1610;

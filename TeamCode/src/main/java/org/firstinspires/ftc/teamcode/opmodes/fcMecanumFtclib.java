@@ -3,8 +3,10 @@ package org.firstinspires.ftc.teamcode.opmodes;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.apache.commons.math3.analysis.function.Constant;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.hardware.hwMecanumFtclib;
 import org.firstinspires.ftc.teamcode.pidcontrollers.pidTurnControllerFtclib;
@@ -17,6 +19,8 @@ public class fcMecanumFtclib extends OpMode {
     ElapsedTime runtime = new ElapsedTime();
     ElapsedTime elapsed = new ElapsedTime();
     Constants.Manipulator.Positions m_manip_pos = Constants.Manipulator.Positions.START;
+    Constants.Manipulator.Positions m_manip_prev_pos = Constants.Manipulator.Positions.START;
+    boolean m_manip_momentary = false;
     Constants.Manipulator.Positions m_last_manip_pos = Constants.Manipulator.Positions.SCORE_ROW1;
     String m_last_command = Constants.Commands.NONE.toString();
     double m_last_command_time = 0.0;
@@ -64,11 +68,12 @@ public class fcMecanumFtclib extends OpMode {
         drive_fwd = robot.driverOp.getLeftY();
         drive_strafe = robot.driverOp.getLeftX();
         drive_turn = robot.driverOp.getRightX();
-        if(Math.abs(drive_turn) > 0.1) pid_turning = false; //if we attempted to turn manually, disable pid turning
-        if(pid_turning) { //set new values for joysticks if we requested pid turning
+        if (Math.abs(drive_turn) > 0.1)
+            pid_turning = false; //if we attempted to turn manually, disable pid turning
+        if (pid_turning) { //set new values for joysticks if we requested pid turning
             // update the pid controller
             turnpid.setTarget(pid_turn_target);
-            if(turnpid.atTarget(robot.getRobotYaw())) {
+            if (turnpid.atTarget(robot.getRobotYaw())) {
                 drive_turn = 0.0;
                 pid_turning = false;
             } else {
@@ -79,13 +84,13 @@ public class fcMecanumFtclib extends OpMode {
         robot.drive.driveFieldCentric(drive_strafe, drive_fwd, drive_turn, robot.getRobotYaw());
 
         // always listen for gyro reset button
-        if(robot.driverOp.getButton(GamepadKeys.Button.BACK)) {
+        if (robot.driverOp.getButton(GamepadKeys.Button.BACK)) {
             robot.imu.resetYaw();
             telemCommand("RESET GYRO");
         }
 
         // automated field-relative turn functions for d-pad
-        if(robot.driverOp.getButton(GamepadKeys.Button.DPAD_LEFT) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_DOWN) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_UP)) {
+        if (robot.driverOp.getButton(GamepadKeys.Button.DPAD_LEFT) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_DOWN) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_UP)) {
             //left, but not up or down
             turnToPID(90);
             telemCommand("PID TURN FC 90");
@@ -104,14 +109,22 @@ public class fcMecanumFtclib extends OpMode {
         }
 
         // handle manipulator
-        if (robot.driverOp.getButton(GamepadKeys.Button.Y)) { //last scoring position
+        if (robot.driverOp.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) < 0.5 && m_manip_momentary) { //release scoring button
+            m_manip_momentary = false;
+            m_manip_pos = m_manip_prev_pos;
+            telemCommand("RETURN");
+        } else if (robot.driverOp.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) >= 0.5 && !m_manip_momentary) { //press scoring button
+            if(m_manip_pos == Constants.Manipulator.Positions.SCORE_ROW1 || m_manip_pos == Constants.Manipulator.Positions.SCORE_ROW2 || m_manip_pos == Constants.Manipulator.Positions.SCORE_ROW3) {
+                m_manip_prev_pos = m_manip_pos;
+                m_manip_momentary = true;
+                m_manip_pos = Constants.Manipulator.Positions.SCORE_DROP1;
+                telemCommand("SCORING POSITION");
+            }
+        } else if (robot.driverOp.getButton(GamepadKeys.Button.Y)) { //last scoring position
             m_manip_pos = m_last_manip_pos;
             telemCommand("LAST SCORING POSITION");
         } else if (robot.driverOp.getButton(GamepadKeys.Button.X)) { //transport
             m_manip_pos = Constants.Manipulator.Positions.TRANSPORT;
-            telemCommand("TRANSPORT POSITION");
-        } else if (robot.driverOp.getButton(GamepadKeys.Button.B)) { //transport
-            m_manip_pos = Constants.Manipulator.Positions.SCORE_DROP1;
             telemCommand("TRANSPORT POSITION");
         } else if (robot.driverOp.getButton(GamepadKeys.Button.A)) { //floor pickup
             m_manip_pos = Constants.Manipulator.Positions.FLOOR_CLOSE;

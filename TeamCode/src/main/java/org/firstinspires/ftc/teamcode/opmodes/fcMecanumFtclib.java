@@ -114,11 +114,58 @@ public class fcMecanumFtclib extends OpMode {
             m_manip_pos = m_manip_prev_pos;
             telemCommand("RETURN");
         } else if (robot.driverOp.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) >= 0.5 && !m_manip_momentary) { //press scoring button
-            if(m_manip_pos == Constants.Manipulator.Positions.SCORE_ROW1 || m_manip_pos == Constants.Manipulator.Positions.SCORE_ROW2 || m_manip_pos == Constants.Manipulator.Positions.SCORE_ROW3) {
-                m_manip_prev_pos = m_manip_pos;
-                m_manip_momentary = true;
-                m_manip_pos = Constants.Manipulator.Positions.SCORE_DROP1;
-                telemCommand("SCORING POSITION");
+            switch (m_manip_pos) {
+                case SCORE_ROW1:
+                    m_manip_prev_pos = m_manip_pos;
+                    m_manip_momentary = true;
+                    m_manip_pos = Constants.Manipulator.Positions.SCORE_DROP1;
+                    telemCommand("SCORING POSITION 1");
+                    break;
+                case SCORE_ROW2:
+                    m_manip_prev_pos = m_manip_pos;
+                    m_manip_momentary = true;
+                    m_manip_pos = Constants.Manipulator.Positions.SCORE_DROP2;
+                    telemCommand("SCORING POSITION 2");
+                    break;
+                case SCORE_ROW3:
+                    m_manip_prev_pos = m_manip_pos;
+                    m_manip_momentary = true;
+                    m_manip_pos = Constants.Manipulator.Positions.SCORE_DROP3;
+                    telemCommand("SCORING POSITION 3");
+                    break;
+                default:
+            }
+        } else if (robot.driverOp.getButton(GamepadKeys.Button.RIGHT_BUMPER)) {
+            switch (m_manip_pos) {
+                case SCORE_ROW1:
+                    m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW2;
+                    telemCommand("SCORING POSITION 2");
+                    break;
+                case SCORE_ROW2:
+                    m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW3;
+                    telemCommand("SCORING POSITION 3");
+                    break;
+                case SCORE_ROW3:
+                    telemCommand("NOTHING");
+                    break;
+                default:
+                    telemCommand("NOTHING");
+            }
+        } else if (robot.driverOp.getButton(GamepadKeys.Button.LEFT_BUMPER)) {
+            switch (m_manip_pos) {
+                case SCORE_ROW1:
+                    telemCommand("NOTHING");
+                    break;
+                case SCORE_ROW2:
+                    m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW1;
+                    telemCommand("SCORING POSITION 1");
+                    break;
+                case SCORE_ROW3:
+                    m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW2;
+                    telemCommand("SCORING POSITION 2");
+                    break;
+                default:
+                    telemCommand("NOTHING");
             }
         } else if (robot.driverOp.getButton(GamepadKeys.Button.Y)) { //last scoring position
             m_manip_pos = m_last_manip_pos;

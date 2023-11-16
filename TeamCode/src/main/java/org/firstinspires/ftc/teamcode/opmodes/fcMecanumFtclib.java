@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -136,36 +137,36 @@ public class fcMecanumFtclib extends OpMode {
                 default:
             }
         } else if (robot.driverOp.getButton(GamepadKeys.Button.RIGHT_BUMPER)) {
-            switch (m_manip_pos) {
-                case SCORE_ROW1:
-                    m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW2;
-                    telemCommand("SCORING POSITION 2");
-                    break;
-                case SCORE_ROW2:
-                    m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW3;
-                    telemCommand("SCORING POSITION 3");
-                    break;
-                case SCORE_ROW3:
-                    telemCommand("NOTHING");
-                    break;
-                default:
-                    telemCommand("NOTHING");
-            }
+                switch (m_manip_pos) {
+                    case SCORE_ROW1:
+                        m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW2;
+                        telemCommand("SCORING POSITION 2");
+                        break;
+                    case SCORE_ROW2:
+//                        m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW3;
+//                        telemCommand("SCORING POSITION 3");
+//                        break;
+                    case SCORE_ROW3:
+//                        telemCommand("NOTHING");
+//                        break;
+                    default:
+//                        telemCommand("NOTHING");
+                }
         } else if (robot.driverOp.getButton(GamepadKeys.Button.LEFT_BUMPER)) {
             switch (m_manip_pos) {
                 case SCORE_ROW1:
-                    telemCommand("NOTHING");
+//                    telemCommand("NOTHING");
                     break;
                 case SCORE_ROW2:
                     m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW1;
                     telemCommand("SCORING POSITION 1");
                     break;
                 case SCORE_ROW3:
-                    m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW2;
-                    telemCommand("SCORING POSITION 2");
-                    break;
+//                    m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW2;
+//                    telemCommand("SCORING POSITION 2");
+//                    break;
                 default:
-                    telemCommand("NOTHING");
+//                    telemCommand("NOTHING");
             }
         } else if (robot.driverOp.getButton(GamepadKeys.Button.Y)) { //last scoring position
             m_manip_pos = m_last_manip_pos;
@@ -177,6 +178,24 @@ public class fcMecanumFtclib extends OpMode {
             m_manip_pos = Constants.Manipulator.Positions.FLOOR_CLOSE;
             telemCommand("FLOOR PICKUP");
         }
+
+//        robot.driverOp.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new InstantCommand(() -> {
+//            switch (m_manip_pos) {
+//                case SCORE_ROW1:
+//                    m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW2;
+//                    telemCommand("SCORING POSITION 2");
+//                    break;
+//                case SCORE_ROW2:
+//                    m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW3;
+//                    telemCommand("SCORING POSITION 3");
+//                    break;
+//                case SCORE_ROW3:
+//                    telemCommand("NOTHING");
+//                    break;
+//                default:
+//                    telemCommand("NOTHING");
+//            }
+//        }));
 
         // Update the manipulator - these should be called every loop to make the manipulator move to target position
         moveElevator();

@@ -95,7 +95,7 @@ public class Constants {
         public static class elevatorController {
             public static double homingSpeed = 0.1; //speed for homing to limit
             public static double ticksPerRev = 28;
-            public static double gearReduction = 20;
+            public static double gearReduction = 100;
             public static double drumDiamInches = 1.3;
             public static double drumCircumferenceInches = drumDiamInches * Math.PI;
             public static double ticksPerInch = (ticksPerRev * gearReduction / drumCircumferenceInches) / 2; //2 stage elevator makes 2:1 reduction
@@ -106,7 +106,7 @@ public class Constants {
             public static double kI = 0.000006; //000002
             public static double kD = 0.002; //002
             public static class limits {
-                public static double maxOutput = 0.60; //maximum output power
+                public static double maxOutput = 0.80; //maximum output power
                 public static double minLength = 0.0; //Minimum extended length of arm
                 public static double maxLength = 24.6; //Maximum extended length of arm
                 public static double maxTicks = 1610;

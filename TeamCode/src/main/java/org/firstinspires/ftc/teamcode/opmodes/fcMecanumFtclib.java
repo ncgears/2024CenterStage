@@ -95,6 +95,15 @@ public class fcMecanumFtclib extends OpMode {
         } else if (robot.driverOp.getButton(GamepadKeys.Button.START)) {
             m_manip_pos = Constants.Manipulator.Positions.START;
             telemCommand("STARTING CONFIG");
+        } else if (robot.driverOp.getButton(GamepadKeys.Button.Y)) {
+            m_manip_pos = Constants.Manipulator.Positions.CLIMB_READY;
+            telemCommand("CLIMB READY");
+        } else if (robot.driverOp.getButton(GamepadKeys.Button.B)) {
+            m_manip_pos = Constants.Manipulator.Positions.CLIMB_UP;
+            telemCommand("CLIMB READY");
+        } else if (robot.driverOp.getButton(GamepadKeys.Button.A)) {
+            m_manip_pos = Constants.Manipulator.Positions.CLIMB_LIFT;
+            telemCommand("CLIMB LIFT");
         }
 
         // automated field-relative turn functions for d-pad

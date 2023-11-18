@@ -66,8 +66,8 @@ public class Constants {
             SCORE_DROP3(775,16,0.0),
             //SCORE_ROWX(975,12,0.0),
             //SCORE_DROPX(775,12,0.0),
-            CLIMB_READY(1230,3.0,-1.0),
-            CLIMB_UP(1230,12.3,-1.0),
+            CLIMB_READY(1230,5.0,-1.0),
+            CLIMB_UP(1230,24,-1.0),
             CLIMB_LIFT(1230,11.0,-1.0);
             final double tilt, elevator, distance;
             Positions(double tilt, double elevator, double distance) {

@@ -82,7 +82,11 @@ public class fcMecanumFtclib extends OpMode {
             }
         }
         // perform the drive
-        robot.drive.driveFieldCentric(drive_strafe, drive_fwd, drive_turn, robot.getRobotYaw());
+        if(robot.getRobotYaw() == 0.0) { //exactly 0 from the imu is unlikely, fall back to robot centric
+            robot.drive.driveRobotCentric(drive_strafe, drive_fwd, drive_turn);
+        } else {
+            robot.drive.driveFieldCentric(drive_strafe, drive_fwd, drive_turn, robot.getRobotYaw());
+        }
 
         // always listen for gyro reset button
         if (robot.driverOp.getButton(GamepadKeys.Button.BACK)) {
@@ -110,11 +114,11 @@ public class fcMecanumFtclib extends OpMode {
         }
 
         // handle manipulator
-        if (robot.driverOp.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) < 0.5 && m_manip_momentary) { //release scoring button
+        if (robot.operOp.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) < 0.5 && m_manip_momentary) { //release scoring button
             m_manip_momentary = false;
             m_manip_pos = m_manip_prev_pos;
             telemCommand("RETURN");
-        } else if (robot.driverOp.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) >= 0.5 && !m_manip_momentary) { //press scoring button
+        } else if (robot.operOp.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) >= 0.5 && !m_manip_momentary) { //press scoring button
             switch (m_manip_pos) {
                 case SCORE_ROW1:
                     m_manip_prev_pos = m_manip_pos;
@@ -136,7 +140,7 @@ public class fcMecanumFtclib extends OpMode {
                     break;
                 default:
             }
-        } else if (robot.driverOp.getButton(GamepadKeys.Button.RIGHT_BUMPER)) {
+        } else if (robot.operOp.getButton(GamepadKeys.Button.RIGHT_BUMPER)) {
                 switch (m_manip_pos) {
                     case SCORE_ROW1:
                         m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW2;
@@ -152,7 +156,7 @@ public class fcMecanumFtclib extends OpMode {
                     default:
 //                        telemCommand("NOTHING");
                 }
-        } else if (robot.driverOp.getButton(GamepadKeys.Button.LEFT_BUMPER)) {
+        } else if (robot.operOp.getButton(GamepadKeys.Button.LEFT_BUMPER)) {
             switch (m_manip_pos) {
                 case SCORE_ROW1:
 //                    telemCommand("NOTHING");
@@ -168,13 +172,13 @@ public class fcMecanumFtclib extends OpMode {
                 default:
 //                    telemCommand("NOTHING");
             }
-        } else if (robot.driverOp.getButton(GamepadKeys.Button.Y)) { //last scoring position
+        } else if (robot.operOp.getButton(GamepadKeys.Button.Y)) { //last scoring position
             m_manip_pos = m_last_manip_pos;
             telemCommand("LAST SCORING POSITION");
-        } else if (robot.driverOp.getButton(GamepadKeys.Button.X)) { //transport
+        } else if (robot.operOp.getButton(GamepadKeys.Button.X)) { //transport
             m_manip_pos = Constants.Manipulator.Positions.TRANSPORT;
             telemCommand("TRANSPORT POSITION");
-        } else if (robot.driverOp.getButton(GamepadKeys.Button.A)) { //floor pickup
+        } else if (robot.operOp.getButton(GamepadKeys.Button.A)) { //floor pickup
             m_manip_pos = Constants.Manipulator.Positions.FLOOR_CLOSE;
             telemCommand("FLOOR PICKUP");
         }

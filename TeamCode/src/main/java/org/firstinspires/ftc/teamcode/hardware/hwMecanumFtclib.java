@@ -73,7 +73,7 @@ public class hwMecanumFtclib {
     // Define Motor and Servo objects
     public Motor m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr = null;
     public Motor[] m_motors = null;
-    public GamepadEx driverOp = null;
+    public GamepadEx driverOp, operOp = null;
     public MecanumDrive drive = null;
     public ServoEx m_pixelservo = null;
 
@@ -122,7 +122,7 @@ public class hwMecanumFtclib {
         drive = new MecanumDrive(m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr);
         // Gamepads
         driverOp = new GamepadEx(myOpMode.gamepad1);
-        //operOp = new GamepadEx(myOpMode.gamepad2);
+        operOp = new GamepadEx(myOpMode.gamepad2);
 
         try {
             // Alliance Flag switches

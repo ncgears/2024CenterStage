@@ -92,6 +92,9 @@ public class fcMecanumFtclib extends OpMode {
         if (robot.driverOp.getButton(GamepadKeys.Button.BACK)) {
             robot.imu.resetYaw();
             telemCommand("RESET GYRO");
+        } else if (robot.driverOp.getButton(GamepadKeys.Button.START)) {
+            m_manip_pos = Constants.Manipulator.Positions.START;
+            telemCommand("STARTING CONFIG");
         }
 
         // automated field-relative turn functions for d-pad

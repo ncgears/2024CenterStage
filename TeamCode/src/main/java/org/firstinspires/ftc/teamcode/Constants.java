@@ -11,6 +11,7 @@ public class Constants {
         public static double autonDriveSpeed = 0.3;
     }
     public static class Drivetrain {
+        public static boolean useFieldCentric = false; //try to use FC if gyro has value
         public static class turnController {
             public static double targetThreshold = 1.0; //how many degrees is close enough
             public static double kP = 0.01;
@@ -55,21 +56,22 @@ public class Constants {
             //elevator = (double) length of the elevator, in inches
             //distance = (double) robot distance from backstage (-1 if not used)
             START(10,0.0,-1.0),
-            TRANSPORT(555,3.0,-1.0),
+            TRANSPORT(555,0.0,-1.0),
             FLOOR_CLOSE(10,0.0,-1.0),
             FLOOR_FAR(100,2.0,-1.0),
-            FLOOR_DESTACK(100,2.0,-1.0),
+            FLOOR_DESTACK(175,3.0,-1.0),
             SCORE_ROW1(975,10,0.0),
-            SCORE_DROP1(775,10,0.0),
+            SCORE_DROP1(650,10,0.0),
             SCORE_ROW2(975,13,0.0),
-            SCORE_DROP2(775,13,0.0),
+            SCORE_DROP2(650,13,0.0),
             SCORE_ROW3(975,16,0.0),
-            SCORE_DROP3(775,16,0.0),
+            SCORE_DROP3(650,16,0.0),
             //SCORE_ROWX(975,12,0.0),
             //SCORE_DROPX(775,12,0.0),
-            CLIMB_READY(1200,5.0,-1.0),
-            CLIMB_UP(1200,24,-1.0),
-            CLIMB_LIFT(1200,11.0,-1.0);
+            CLIMB_READY(1200,7.0,-1.0),
+            CLIMB_UP(1200,22,-1.0),
+            CLIMB_LIFT(1200,1.5,-1.0),
+            CLIMB_VERT(50, 1.0, -1.0);
             final double tilt, elevator, distance;
             Positions(double tilt, double elevator, double distance) {
                 this.tilt = tilt;

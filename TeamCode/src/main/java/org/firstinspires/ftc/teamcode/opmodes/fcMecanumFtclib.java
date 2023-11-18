@@ -82,7 +82,7 @@ public class fcMecanumFtclib extends OpMode {
             }
         }
         // perform the drive
-        if(robot.getRobotYaw() == 0.0) { //exactly 0 from the imu is unlikely, fall back to robot centric
+        if(robot.getRobotYaw() == 0.0 || !Constants.Drivetrain.useFieldCentric) { //exactly 0 from the imu is unlikely, fall back to robot centric
             robot.drive.driveRobotCentric(drive_strafe, drive_fwd, drive_turn);
         } else {
             robot.drive.driveFieldCentric(drive_strafe, drive_fwd, drive_turn, robot.getRobotYaw());
@@ -113,6 +113,9 @@ public class fcMecanumFtclib extends OpMode {
         } else if (robot.driverOp.getButton(GamepadKeys.Button.A)) {
             m_manip_pos = Constants.Manipulator.Positions.CLIMB_LIFT;
             telemCommand("CLIMB LIFT");
+        } else if (robot.driverOp.getButton(GamepadKeys.Button.X)) {
+            m_manip_pos = Constants.Manipulator.Positions.CLIMB_VERT;
+            telemCommand("CLIMB VERT");
         }
 
         // automated field-relative turn functions for d-pad
@@ -158,6 +161,12 @@ public class fcMecanumFtclib extends OpMode {
                     m_manip_momentary = true;
                     m_manip_pos = Constants.Manipulator.Positions.SCORE_DROP3;
                     telemCommand("SCORING POSITION 3");
+                    break;
+                case TRANSPORT:
+                    m_manip_prev_pos = m_manip_pos;
+                    m_manip_momentary = true;
+                    m_manip_pos = Constants.Manipulator.Positions.FLOOR_DESTACK;
+                    telemCommand("DESTACK");
                     break;
                 default:
             }

@@ -16,7 +16,8 @@ import org.firstinspires.ftc.teamcode.pidcontrollers.pidTurnControllerFtclib;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Autonomous(name="JRB-1", group="JRB")
-public class autonJRB1 extends OpMode {
+public class
+autonJRB1 extends OpMode {
     hwMecanumFtclib robot = new hwMecanumFtclib(this);
     ElapsedTime runtime = new ElapsedTime();
     ElapsedTime elapsed = new ElapsedTime();

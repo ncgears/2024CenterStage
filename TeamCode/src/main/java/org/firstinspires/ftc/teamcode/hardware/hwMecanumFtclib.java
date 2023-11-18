@@ -265,7 +265,7 @@ public class hwMecanumFtclib {
     public Alliance determineAlliance() {
         try {
             //digital channels have pull-up resistor so they are high normally
-            if(!m_flag_a.getState() && !m_flag_b.getState()) return Alliance.RED; //if both switches, red flag
+            if(!m_flag_a.getState() && !m_flag_b.getState()) return Alliance.RED; //if neither switches, red flag
             if(!m_flag_a.getState() || !m_flag_b.getState()) return Alliance.BLUE; //if one switch, blue flag
             return Alliance.NONE; //indeterminate, either flag not installed or a wiring fault
         } catch(Exception e) {

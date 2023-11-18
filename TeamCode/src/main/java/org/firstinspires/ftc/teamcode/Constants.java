@@ -60,10 +60,10 @@ public class Constants {
             FLOOR_DESTACK(100,2.0,-1.0),
             SCORE_ROW1(975,10,0.0),
             SCORE_DROP1(775,10,0.0),
-            SCORE_ROW2(975,11,0.0),
-            SCORE_DROP2(775,11,0.0),
-            SCORE_ROW3(975,12,0.0),
-            SCORE_DROP3(775,12,0.0),
+            SCORE_ROW2(975,13,0.0),
+            SCORE_DROP2(775,13,0.0),
+            SCORE_ROW3(975,16,0.0),
+            SCORE_DROP3(775,16,0.0),
             //SCORE_ROWX(975,12,0.0),
             //SCORE_DROPX(775,12,0.0),
             CLIMB_READY(1230,3.0,-1.0),
@@ -82,9 +82,9 @@ public class Constants {
         public static class tiltController {
             public static double homingSpeed = 0.1; //speed for homing to limit
             public static double targetThresholdTicks = 10; //how many encoder ticks is close enough
-            public static double kF = 0.0; //5; //minimum power to move the motor
-            public static double kP = 0.0015; //0.0025
-            public static double kI = 0.0000015; //0.0000035
+            public static double kF = 0.0; //0.0 //minimum power to move the motor
+            public static double kP = 0.0015; //0.0015
+            public static double kI = 0.0000015; //0.0000015
             public static double kD = 0.002; //0.002
             public static class limits {
                 public static double maxOutput = 0.60; //maximum output power
@@ -100,16 +100,16 @@ public class Constants {
             public static double drumCircumferenceInches = drumDiamInches * Math.PI;
             public static double ticksPerInch = (ticksPerRev * gearReduction / drumCircumferenceInches) / 2; //2 stage elevator makes 2:1 reduction
             public static double targetThreshold = 0.2; //how many inches is close enough
-            public static double targetThresholdTicks = 10; //targetThreshold * ticksPerInch;
-            public static double kF = 0.0; //0.0; //minimum power to move the motor
-            public static double kP = 0.0035; //0025
+            public static double targetThresholdTicks = 50; //targetThreshold * ticksPerInch;
+            public static double kF = 0.0; //0.0 //minimum power to move the motor
+            public static double kP = 0.0030; //0025
             public static double kI = 0.000006; //000002
-            public static double kD = 0.002; //002
+            public static double kD = 0.001; //002
             public static class limits {
-                public static double maxOutput = 0.80; //maximum output power
+                public static double maxOutput = 1.00; //maximum output power
                 public static double minLength = 0.0; //Minimum extended length of arm
                 public static double maxLength = 24.6; //Maximum extended length of arm
-                public static double maxTicks = 1610;
+                public static double maxTicks = 16100;
             }
         }
     }

@@ -1,7 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
+@SuppressWarnings("unused")
 public class Constants {
-    public enum Commands { NONE, ROBOT_RESET, GYRO_RESET, TOGGLE_PIXEL, DETERMINE_TEAM, PID_TURN_0, PID_TURN_90, PID_TURN_N90, PID_TURN_180 }
+    public enum Commands { NONE, ROBOT_RESET, GYRO_RESET, TOGGLE_PIXEL, DETERMINE_TEAM }
     public enum Alliance { RED, BLUE, NONE }
     public enum TSELocation { LEFT, MIDDLE, RIGHT, NONE }
     public static class Global {
@@ -32,11 +33,11 @@ public class Constants {
     }
 
     public static class PixelDropper {
-        public static enum Positions {
+        public enum Positions {
             DOWN(0.0),
             UP(20.0);
             private final double angle;
-            private Positions(double angle) { this.angle = angle; }
+            Positions(double angle) { this.angle = angle; }
             public double getAngle() { return this.angle; }
         }
     }

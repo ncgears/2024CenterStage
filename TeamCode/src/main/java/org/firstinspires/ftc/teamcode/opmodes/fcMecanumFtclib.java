@@ -1,13 +1,12 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
-import com.arcrobotics.ftclib.command.InstantCommand;
+//import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Gamepad;
+//import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.apache.commons.math3.analysis.function.Constant;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.hardware.hwMecanumFtclib;
 import org.firstinspires.ftc.teamcode.pidcontrollers.pidTurnControllerFtclib;
@@ -23,6 +22,7 @@ public class fcMecanumFtclib extends OpMode {
     Constants.Manipulator.Positions m_manip_prev_pos = Constants.Manipulator.Positions.START;
     boolean m_manip_momentary = false;
     Constants.Manipulator.Positions m_last_manip_pos = Constants.Manipulator.Positions.SCORE_ROW1;
+    boolean m_manip_manual = false;
     String m_last_command = Constants.Commands.NONE.toString();
     double m_last_command_time = 0.0;
 
@@ -94,6 +94,15 @@ public class fcMecanumFtclib extends OpMode {
             telemCommand("RESET GYRO");
         } else if (robot.driverOp.getButton(GamepadKeys.Button.START)) {
             m_manip_pos = Constants.Manipulator.Positions.START;
+            m_manip_manual = true;
+            try {
+                moveElevator();
+                wait(3000);
+                moveTilt();
+            } catch (Exception e) {
+            } finally {
+                m_manip_manual = false;
+            }
             telemCommand("STARTING CONFIG");
         } else if (robot.driverOp.getButton(GamepadKeys.Button.Y)) {
             m_manip_pos = Constants.Manipulator.Positions.CLIMB_READY;
@@ -214,8 +223,10 @@ public class fcMecanumFtclib extends OpMode {
 //        }));
 
         // Update the manipulator - these should be called every loop to make the manipulator move to target position
-        moveElevator();
-        moveTilt();
+        if(!m_manip_manual) {
+            moveElevator();
+            moveTilt();
+        }
 
         // command name updates for telemetry
         if(m_last_command != "NONE" && runtime.seconds() - m_last_command_time > 2) { //reset the last command after 2 seconds

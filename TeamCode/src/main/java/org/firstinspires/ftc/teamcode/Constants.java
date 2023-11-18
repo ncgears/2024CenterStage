@@ -66,9 +66,9 @@ public class Constants {
             SCORE_DROP3(775,16,0.0),
             //SCORE_ROWX(975,12,0.0),
             //SCORE_DROPX(775,12,0.0),
-            CLIMB_READY(1230,5.0,-1.0),
-            CLIMB_UP(1230,24,-1.0),
-            CLIMB_LIFT(1230,11.0,-1.0);
+            CLIMB_READY(1200,5.0,-1.0),
+            CLIMB_UP(1200,24,-1.0),
+            CLIMB_LIFT(1200,11.0,-1.0);
             final double tilt, elevator, distance;
             Positions(double tilt, double elevator, double distance) {
                 this.tilt = tilt;
@@ -89,7 +89,7 @@ public class Constants {
             public static class limits {
                 public static double maxOutput = 0.60; //maximum output power
                 public static double minTicks = 0.0; //Minimum encoder ticks of target (at limit sw)
-                public static double maxTicks = 1220.0; //Maximum encoder ticks of target (at limit sw)
+                public static double maxTicks = 1210.0; //Maximum encoder ticks of target (at limit sw)
             }
         }
         public static class elevatorController {

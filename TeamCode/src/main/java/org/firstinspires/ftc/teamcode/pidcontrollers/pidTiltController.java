@@ -12,6 +12,7 @@ public class pidTiltController {
     private ElapsedTime timer = new ElapsedTime();
     private double lastError, lastTime = 0.0;
     private OpMode myOpMode = null;
+    private double offset = 0.0;
 
     public pidTiltController(OpMode opmode, double target, double p, double i, double d, double f) {
         myOpMode = opmode;
@@ -65,7 +66,7 @@ public class pidTiltController {
     }
 
     public void setTarget(double ticks) {
-        double calcTarget = ticks;
+        double calcTarget = ticks + offset;
         calcTarget = Math.max(calcTarget,Constants.Manipulator.tiltController.limits.minTicks); //make sure we are above min
         calcTarget = Math.min(calcTarget,Constants.Manipulator.tiltController.limits.maxTicks); //make sure we are below max
         targetTicks = calcTarget;
@@ -81,4 +82,12 @@ public class pidTiltController {
     public boolean atTarget() {
         return (Math.abs(lastError) < Constants.Manipulator.tiltController.targetThresholdTicks);
     }
+
+    public void increaseOffset() {
+        offset += Constants.Manipulator.tiltController.offsetStepSize;
+    }
+    public void decreaseOffset() {
+        offset -= Constants.Manipulator.tiltController.offsetStepSize;
+    }
+
 }

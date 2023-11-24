@@ -12,6 +12,7 @@ public class pidElevatorController {
     private ElapsedTime timer = new ElapsedTime();
     private double lastError, lastTime = 0.0;
     private OpMode myOpMode = null;
+    private double offset = 0.0;
 
     public pidElevatorController(OpMode opmode, double target, double p, double i, double d, double f) {
         myOpMode = opmode;
@@ -74,7 +75,7 @@ public class pidElevatorController {
     }
 
     public void setTarget(double ticks) {
-        double calcTarget = ticks;
+        double calcTarget = ticks + offset;
         calcTarget = Math.max(calcTarget,Constants.Manipulator.elevatorController.limits.minLength * Constants.Manipulator.elevatorController.ticksPerInch); //make sure we are above min
         calcTarget = Math.min(calcTarget,Constants.Manipulator.elevatorController.limits.maxLength * Constants.Manipulator.elevatorController.ticksPerInch); //make sure we are below max
 
@@ -92,5 +93,12 @@ public class pidElevatorController {
     }
     public boolean atTarget() {
         return (Math.abs(lastError) < Constants.Manipulator.elevatorController.targetThresholdTicks);
+    }
+
+    public void increaseOffset() {
+        offset += Constants.Manipulator.elevatorController.offsetStepSize;
+    }
+    public void decreaseOffset() {
+        offset -= Constants.Manipulator.elevatorController.offsetStepSize;
     }
 }

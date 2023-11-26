@@ -76,6 +76,7 @@ public class hwMecanumFtclib {
     public GamepadEx driverOp, operOp = null;
     public MecanumDrive drive = null;
     public ServoEx m_pixelservo = null;
+    public ServoEx m_droneservo = null;
 
     public IMU imu = null;
 
@@ -89,6 +90,9 @@ public class hwMecanumFtclib {
 
     // Pixel Dropper related stuff
     public Constants.PixelDropper.Positions m_pixel_position = null;
+
+    // Drone Launcher related stuff
+    public Constants.DroneLauncher.Positions m_drone_position = null;
 
     // Distance sensor
     public SensorRevTOFDistance m_distance = null;
@@ -168,6 +172,15 @@ public class hwMecanumFtclib {
             m_pixelservo = new SimpleServo(hwMap, "pixel servo", 0, 30);
             m_pixelservo.setInverted(false);
             setPixelPosition(Constants.PixelDropper.Positions.DOWN);
+        } catch (Exception e) {
+            myOpMode.telemetry.addLine("ERROR: Could not init Pixel Servo");
+        }
+
+        try {
+            // Drone Launcher
+            m_droneservo = new SimpleServo(hwMap, "drone servo", 0, 30);
+            m_droneservo.setInverted(false);
+            setDronePosition(Constants.DroneLauncher.Positions.ARMED);
         } catch (Exception e) {
             myOpMode.telemetry.addLine("ERROR: Could not init Pixel Servo");
         }
@@ -331,6 +344,15 @@ public class hwMecanumFtclib {
     }
     public Constants.PixelDropper.Positions getPixelPosition() {
         return m_pixel_position;
+    }
+
+    // Drone Launcher Methods
+    public void setDronePosition(Constants.DroneLauncher.Positions position) {
+        m_drone_position = position;
+        m_droneservo.turnToAngle(position.getAngle());
+    }
+    public Constants.DroneLauncher.Positions getDronePosition() {
+        return m_drone_position;
     }
 
     // Distance Sensor Methods

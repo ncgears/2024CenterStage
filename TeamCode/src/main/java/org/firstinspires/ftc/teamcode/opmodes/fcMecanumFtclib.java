@@ -33,6 +33,8 @@ public class fcMecanumFtclib extends OpMode {
     pidTiltController tiltpid = new pidTiltController(this, m_manip_pos.getTilt(), Constants.Manipulator.tiltController.kP, Constants.Manipulator.tiltController.kI, Constants.Manipulator.tiltController.kD, Constants.Manipulator.tiltController.kF);
     pidElevatorController elevpid = new pidElevatorController(this, m_manip_pos.getElevator(), Constants.Manipulator.elevatorController.kP, Constants.Manipulator.elevatorController.kI, Constants.Manipulator.elevatorController.kD, Constants.Manipulator.elevatorController.kF);
 
+    boolean pressed_rb, pressed_lb, pressed_up, pressed_dn, pressed_lt, pressed_rt = false; //for debouncing button presses
+
     @Override
     public void init() {
         robot.init(hardwareMap);
@@ -82,7 +84,7 @@ public class fcMecanumFtclib extends OpMode {
             }
         }
         // perform the drive
-        if(robot.getRobotYaw() == 0.0 || !Constants.Drivetrain.useFieldCentric) { //exactly 0 from the imu is unlikely, fall back to robot centric
+        if (robot.getRobotYaw() == 0.0 || !Constants.Drivetrain.useFieldCentric) { //exactly 0 from the imu is unlikely, fall back to robot centric
             robot.drive.driveRobotCentric(drive_strafe, drive_fwd, drive_turn);
         } else {
             robot.drive.driveFieldCentric(drive_strafe, drive_fwd, drive_turn, robot.getRobotYaw());
@@ -170,35 +172,35 @@ public class fcMecanumFtclib extends OpMode {
                     break;
                 default:
             }
-        } else if (robot.operOp.getButton(GamepadKeys.Button.RIGHT_BUMPER)) {
-                switch (m_manip_pos) {
-                    case SCORE_ROW1:
-                        m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW2;
-                        telemCommand("SCORING POSITION 2");
-                        break;
-                    case SCORE_ROW2:
-//                        m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW3;
-//                        telemCommand("SCORING POSITION 3");
-//                        break;
-                    case SCORE_ROW3:
-//                        telemCommand("NOTHING");
-//                        break;
-                    default:
-//                        telemCommand("NOTHING");
-                }
-        } else if (robot.operOp.getButton(GamepadKeys.Button.LEFT_BUMPER)) {
+        } else if (!pressed_rb && robot.operOp.getButton(GamepadKeys.Button.RIGHT_BUMPER)) { //position up
             switch (m_manip_pos) {
                 case SCORE_ROW1:
-//                    telemCommand("NOTHING");
+                    m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW2;
+                    telemCommand("SCORING POSITION 2");
+                    break;
+                case SCORE_ROW2:
+                    m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW3;
+                    telemCommand("SCORING POSITION 3");
+                    break;
+                case SCORE_ROW3:
+//                        telemCommand("NOTHING");
+//                        break;
+                default:
+//                        telemCommand("NOTHING");
+            }
+        } else if (!pressed_lb && robot.operOp.getButton(GamepadKeys.Button.LEFT_BUMPER)) { //position down
+            switch (m_manip_pos) {
+                case SCORE_ROW3:
+                    m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW2;
+                    telemCommand("SCORING POSITION 2");
                     break;
                 case SCORE_ROW2:
                     m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW1;
                     telemCommand("SCORING POSITION 1");
                     break;
-                case SCORE_ROW3:
-//                    m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW2;
-//                    telemCommand("SCORING POSITION 2");
-//                    break;
+                case SCORE_ROW1:
+//                    telemCommand("NOTHING");
+                    break;
                 default:
 //                    telemCommand("NOTHING");
             }
@@ -211,6 +213,36 @@ public class fcMecanumFtclib extends OpMode {
         } else if (robot.operOp.getButton(GamepadKeys.Button.A)) { //floor pickup
             m_manip_pos = Constants.Manipulator.Positions.FLOOR_CLOSE;
             telemCommand("FLOOR PICKUP");
+        } else if (pressed_rb && !robot.operOp.getButton(GamepadKeys.Button.RIGHT_BUMPER)) { //released the button
+            pressed_rb = false;
+        } else if (pressed_lb && !robot.operOp.getButton(GamepadKeys.Button.LEFT_BUMPER)) { //released the button
+            pressed_lb = false;
+        }
+
+        /** DPAD_UP and DPAD_DOWN handles adjusting the tilt offset */
+        if (!pressed_up && robot.operOp.getButton(GamepadKeys.Button.DPAD_UP)) { //tilt offset up
+            pressed_up = true;
+            tiltpid.increaseOffset();
+        } else if (!pressed_dn && robot.operOp.getButton(GamepadKeys.Button.DPAD_DOWN)) { //tilt offset down
+            pressed_dn = true;
+            tiltpid.decreaseOffset();
+        } else if (pressed_up && !robot.operOp.getButton(GamepadKeys.Button.DPAD_UP)) { //released the button
+            pressed_up = false;
+        } else if (pressed_dn && !robot.operOp.getButton(GamepadKeys.Button.DPAD_DOWN)) { //released the button
+            pressed_dn = false;
+        }
+
+        /** Left and Right DPAD handles adjusting the elevator offset */
+        if (!pressed_rt && robot.operOp.getButton(GamepadKeys.Button.DPAD_RIGHT)) { //elev offset up
+            pressed_rt = true;
+            elevpid.increaseOffset();
+        } else if (!pressed_lt && robot.operOp.getButton(GamepadKeys.Button.DPAD_LEFT)) { //elev offset down
+            pressed_lt = true;
+            elevpid.decreaseOffset();
+        } else if (pressed_lt && !robot.operOp.getButton(GamepadKeys.Button.DPAD_LEFT)) { //released the button
+            pressed_lt = false;
+        } else if (pressed_rt && !robot.operOp.getButton(GamepadKeys.Button.DPAD_RIGHT)) { //released the button
+            pressed_rt = false;
         }
 
 //        robot.driverOp.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new InstantCommand(() -> {
@@ -286,6 +318,7 @@ public class fcMecanumFtclib extends OpMode {
         telemetry.addData("Robot Heading", "%.2f", robot.getRobotYaw());
         telemetry.addData("Obstacle Distance", "%.2f Inches", robot.getDistance());
         telemetry.addData("Pixel Dropper", robot.getPixelPosition().toString());
+        telemetry.addData("Drone Launcher", robot.getDronePosition().toString());
         telemetry.addData("Manipulator Position", m_manip_pos.toString());
         telemetry.addData("Tilt", "lim=%s, tgt=%.0f, pos=%d, pwr=%.2f", robot.getTiltLimitString(), tiltpid.getTarget(), robot.getTiltPosition(), robot.getTiltPower());
         telemetry.addData("Elev", "lim=%s, tgt=%.0f, pos=%d, pwr=%.2f", robot.getElevatorLimitString(), elevpid.getTarget(), robot.getElevatorPosition(), robot.getElevatorPower());

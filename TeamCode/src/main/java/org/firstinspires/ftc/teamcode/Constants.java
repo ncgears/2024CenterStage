@@ -42,6 +42,15 @@ public class Constants {
             public double getAngle() { return this.angle; }
         }
     }
+    public static class DroneLauncher {
+        public enum Positions {
+            ARMED(0.0),
+            LAUNCH(20.0);
+            private final double angle;
+            Positions(double angle) { this.angle = angle; }
+            public double getAngle() { return this.angle; }
+        }
+    }
 
     /**
      * The Manipulator constants relate to the top-end system above the drivetrain.

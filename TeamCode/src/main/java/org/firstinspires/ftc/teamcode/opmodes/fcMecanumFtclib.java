@@ -90,6 +90,7 @@ public class fcMecanumFtclib extends OpMode {
             robot.drive.driveFieldCentric(drive_strafe, drive_fwd, drive_turn, robot.getRobotYaw());
         }
 
+        /** Driver Controls */
         // always listen for gyro reset button
         if (robot.driverOp.getButton(GamepadKeys.Button.BACK)) {
             robot.imu.resetYaw();
@@ -138,8 +139,9 @@ public class fcMecanumFtclib extends OpMode {
             turnToPID(180);
             telemCommand("PID TURN FC 180");
         }
+        /** End Driver Controls */
 
-        // handle manipulator
+        /** Operator Controls */
         if (robot.operOp.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) < 0.5 && m_manip_momentary) { //release scoring button
             m_manip_momentary = false;
             m_manip_pos = m_manip_prev_pos;
@@ -262,6 +264,7 @@ public class fcMecanumFtclib extends OpMode {
 //                    telemCommand("NOTHING");
 //            }
 //        }));
+        /** End Operator Controls */
 
         // Update the manipulator - these should be called every loop to make the manipulator move to target position
         if(!m_manip_manual) {

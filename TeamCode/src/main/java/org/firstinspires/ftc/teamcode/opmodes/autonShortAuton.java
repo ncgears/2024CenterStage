@@ -17,11 +17,9 @@ import org.firstinspires.ftc.teamcode.pidcontrollers.pidTurnControllerFtclib;
 import org.firstinspires.ftc.teamcode.processors.tseSaturationProcessor;
 import org.firstinspires.ftc.vision.VisionPortal;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 @Autonomous(name="TEST Short Auton", group="JRB")
 public class
-autonJRB1 extends OpMode {
+autonShortAuton extends OpMode {
     boolean m_long_auton = false; //set true if this is the long auton
     hwMecanumFtclib robot = new hwMecanumFtclib(this);
     ElapsedTime runtime = new ElapsedTime();
@@ -37,7 +35,7 @@ autonJRB1 extends OpMode {
     double pid_turn_target = 0; //target degrees for pid turn
     boolean pid_driving, pid_turning = false; //tracking if we are using these pid controllers
     pidDriveControllerFtclib drivepid = new pidDriveControllerFtclib(this, pid_drive_target, Constants.Drivetrain.driveController.kP, Constants.Drivetrain.driveController.kI, Constants.Drivetrain.driveController.kD, Constants.Drivetrain.driveController.kF);
-    pidTurnControllerFtclib turnpid = new pidTurnControllerFtclib(this, pid_turn_target, Constants.Drivetrain.turnController.kP, Constants.Drivetrain.turnController.kI, Constants.Drivetrain.turnController.kD);
+    pidTurnControllerFtclib turnpid = new pidTurnControllerFtclib(this, pid_turn_target, Constants.Drivetrain.turnController.kP, Constants.Drivetrain.turnController.kI, Constants.Drivetrain.turnController.kD, Constants.Drivetrain.turnController.kF);
     pidTiltController tiltpid = new pidTiltController(this, m_manip_pos.getTilt(), Constants.Manipulator.tiltController.kP, Constants.Manipulator.tiltController.kI, Constants.Manipulator.tiltController.kD, Constants.Manipulator.tiltController.kF);
     pidElevatorController elevpid = new pidElevatorController(this, m_manip_pos.getElevator(), Constants.Manipulator.elevatorController.kP, Constants.Manipulator.elevatorController.kI, Constants.Manipulator.elevatorController.kD, Constants.Manipulator.elevatorController.kF);
 
@@ -171,7 +169,7 @@ autonJRB1 extends OpMode {
                 .onExit( () -> { //actions to perform when exiting state
                     pid_turning = false;
                 })
-                .transitionWithPointerState( () -> (false && pid_turning && turnpid.atTarget(robot.getRobotYaw())), States.RESTING) //TODO: Comment this
+                .transitionWithPointerState( () -> (pid_turning && turnpid.atTarget(robot.getRobotYaw())), States.RESTING) //TODO: Comment this
 //                .transition( () -> (pid_turning && turnpid.atTarget(robot.getRobotYaw())) )
                 .state(States.DRIVE_TO_MID) //create state
                 .onEnter( () -> { //actions to perform when entering state
@@ -252,7 +250,7 @@ autonJRB1 extends OpMode {
         turnpid.setTarget(pid_turn_target);
         drive_fwd = (pid_driving) ? drivepid.update(robot.getDriveAvgPosition()) : 0.0;
         drive_strafe = 0.0;
-        drive_turn = (pid_turning) ? turnpid.update(robot.getRobotYaw()) : 0.0;
+        drive_turn = (pid_turning) ? -turnpid.update(robot.getRobotYaw()) : 0.0;
         autonDrive(drive_fwd, 0, drive_turn, robot.getRobotYaw());
 
         if(m_last_command != Constants.Commands.NONE && runtime.seconds() - m_last_command_time > 2) { //reset the last command after 2 seconds

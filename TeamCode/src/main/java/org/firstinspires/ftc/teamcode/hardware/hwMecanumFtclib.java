@@ -247,17 +247,18 @@ public class hwMecanumFtclib {
     }
 
     public int getDriveAvgPosition() {
+        return getDriveAvgPosition(false);
+    }
+    public int getDriveAvgPosition(boolean frontOnly) {
         int fl = m_motor_fl.getCurrentPosition();
         int fr = m_motor_fr.getCurrentPosition();
         int rl = m_motor_rl.getCurrentPosition();
         int rr = m_motor_rr.getCurrentPosition();
 
         //right
-//        double right = Math.min(Math.abs(fr),Math.abs(rr)) * Math.signum(fr);
-        double right = fr;
+        double right = (frontOnly) ? fr : Math.min(Math.abs(fr),Math.abs(rr)) * Math.signum(fr);
         //left
-//        double left = Math.min(Math.abs(fl),Math.abs(rl)) * Math.signum(fr);
-        double left = fl;
+        double left = (frontOnly) ? fl : Math.min(Math.abs(fl),Math.abs(rl)) * Math.signum(fl);
         //average
         int avg = (int) ((right + left) / 2);
 

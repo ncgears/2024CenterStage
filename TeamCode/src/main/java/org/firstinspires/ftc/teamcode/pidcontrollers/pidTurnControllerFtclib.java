@@ -7,18 +7,19 @@ import org.firstinspires.ftc.teamcode.Constants;
 
 public class pidTurnControllerFtclib {
     private double targetAngle;
-    private double kP, kI, kD;
+    private double kP, kI, kD, kF;
     private double accumulatedError = 0.0;
     private ElapsedTime timer = new ElapsedTime();
     private double lastError, lastTime = 0.0;
     private OpMode myOpMode = null;
 
-    public pidTurnControllerFtclib(OpMode opmode, double target, double p, double i, double d) {
+    public pidTurnControllerFtclib(OpMode opmode, double target, double p, double i, double d, double f) {
         myOpMode = opmode;
         targetAngle = target;
         kP = p;
         kI = i;
         kD = d;
+        kF = f;
     }
     public double update(double currentAngle) {
         //P - Proportional - This determines the error that we will multiply by our constant to set power
@@ -45,9 +46,13 @@ public class pidTurnControllerFtclib {
         lastError = error;
 
         //Motor Power calculation
-        double motorPower = 0.1 * Math.signum(error) + 0.9 * Math.tanh(
+        double motorPower = kF * Math.signum(error) + (1.0 - kF) * Math.tanh(
                 (kP * error) + (kI * accumulatedError) + (kD * slope)
         );
+
+        //Limit output to max value
+        motorPower = Math.min(Math.abs(motorPower),Constants.Drivetrain.turnController.limits.maxOutput) * Math.signum(motorPower);
+
         return motorPower;
     }
     public double getTarget() {

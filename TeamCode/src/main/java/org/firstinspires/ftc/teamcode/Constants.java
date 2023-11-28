@@ -11,12 +11,16 @@ public class Constants {
         public static double autonDriveSpeed = 0.3;
     }
     public static class Drivetrain {
-        public static boolean useFieldCentric = false; //try to use FC if gyro has value
+        public static boolean useFieldCentric = true; //try to use FC if gyro has value
         public static class turnController {
-            public static double targetThreshold = 1.0; //how many degrees is close enough
+            public static double targetThreshold = 2.0; //how many degrees is close enough
+            public static double kF = 0.15; //0.0 //minimum power to move the robot
             public static double kP = 0.01;
             public static double kI = 0.0;
             public static double kD = 0.003;
+            public static class limits {
+                public static double maxOutput = 0.55; //maximum output power
+            }
         }
         public static class driveController {
             public static double ticksPerRev = 28;
@@ -25,12 +29,15 @@ public class Constants {
             public static double wheelCircumferenceMM = wheelDiamMM * Math.PI;
             public static double ticksPerMM = ticksPerRev * gearReduction / wheelCircumferenceMM;
             public static double ticksPerInch = ticksPerMM * 25.4;
-            public static double targetThreshold = 0.5; //how many inches is close enough
+            public static double targetThreshold = 1.0; //how many inches is close enough
             public static double targetThresholdTicks = targetThreshold * ticksPerInch;
             public static double kF = 0.15; //0.0 //minimum power to move the robot
             public static double kP = 0.0005;
             public static double kI = 0.0;
             public static double kD = 0.003;
+            public static class limits {
+                public static double maxOutput = 0.55; //maximum output power
+            }
         }
     }
 

@@ -117,7 +117,9 @@ public class hwMecanumFtclib {
     public void init(HardwareMap ahwMap) {
         hwMap = ahwMap;
         // Define and Initialize Motors
-        imu = hwMap.get(IMU.class, "imu");
+        imu = hwMap.get(IMU.class, "imu"); //imu is BNO055 in EH
+        //imu = hwMap.get(IMU.class, "imu2"); //imu2 is BHI260AP in CH
+
         m_motor_fl = new Motor(hwMap, "fl drive");
         m_motor_fr = new Motor(hwMap, "fr drive");
         m_motor_rl = new Motor(hwMap, "rl drive");
@@ -212,8 +214,9 @@ public class hwMecanumFtclib {
         }
 
         // Adjust the orientation parameters of the IMU
+        // 2023 - imu2 is LEFT, imu is RIGHT
         IMU.Parameters imuParams = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
         imu.initialize(imuParams);
 

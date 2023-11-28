@@ -49,6 +49,10 @@ public class fcMecanumFtclib extends OpMode {
             robot.imu.resetYaw();
             telemCommand("RESET GYRO");
         }
+//        // Don't do this while waiting for teleop, robot doesnt get reset between auton and teleop
+//        if(runtime.seconds() - m_last_command_time > 2.0) { //reset imu every 2 seconds during init
+//            robot.imu.resetYaw();
+//        }
         // command name updates for telemetry
         if(m_last_command != "NONE" && runtime.seconds() - m_last_command_time > 2) { //reset the last command after 2 seconds
             telemCommand("NONE");

@@ -72,7 +72,7 @@ public class hwMecanumFtclib {
 
     // Define Motor and Servo objects
     public Motor m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr = null;
-    public Motor[] m_motors = null;
+//    public Motor[] m_motors = null;
     public GamepadEx driverOp, operOp = null;
     public MecanumDrive drive = null;
     public ServoEx m_pixelservo = null;
@@ -125,7 +125,7 @@ public class hwMecanumFtclib {
         m_motor_rl = new Motor(hwMap, "rl drive");
         m_motor_rr = new Motor(hwMap, "rr drive");
         Motor[] m_motors = {m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr};
-        drive = new MecanumDrive(m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr);
+        drive = new MecanumDrive(false, m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr); //do not invert right, we handle this later to fix encoders too
         // Gamepads
         driverOp = new GamepadEx(myOpMode.gamepad1);
         operOp = new GamepadEx(myOpMode.gamepad2);
@@ -198,10 +198,7 @@ public class hwMecanumFtclib {
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-        m_motor_fl.setInverted(false);
-        m_motor_rl.setInverted(false);
-        m_motor_fr.setInverted(false);
-        m_motor_rr.setInverted(false);
+        setMotorInverted(false,true,false,true);
 
         // Set the runmode for each motor
         for (Motor m : m_motors) {
@@ -224,6 +221,13 @@ public class hwMecanumFtclib {
         myOpMode.telemetry.update();
     }
 
+    public void setMotorInverted(boolean fl, boolean fr, boolean rl, boolean rr) {
+        m_motor_fl.setInverted(fl);
+        m_motor_rl.setInverted(rl);
+        m_motor_fr.setInverted(fr);
+        m_motor_rr.setInverted(rr);
+    }
+
     public void setAllDrivePower(double p) {
         setDrivePower(p,p,p,p);
     }
@@ -233,13 +237,10 @@ public class hwMecanumFtclib {
         m_motor_fr.set(fr);
         m_motor_rl.set(rl);
         m_motor_rr.set(rr);
-//        myOpMode.telemetry.addData("fl power","%.1f", fl);
-//        myOpMode.telemetry.addData("fr power","%.1f", fr);
-//        myOpMode.telemetry.addData("rl power","%.1f", rl);
-//        myOpMode.telemetry.addData("rr power","%.1f", rr);
     }
 
     public void resetAllDriveEncoder() {
+        Motor[] m_motors = {m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr};
         for (Motor m : m_motors) {
             m.resetEncoder();
         }
@@ -264,7 +265,7 @@ public class hwMecanumFtclib {
 //        myOpMode.telemetry.addData("fr enc", "%d", fr);
 //        myOpMode.telemetry.addData("rl enc", "%d", rl);
 //        myOpMode.telemetry.addData("rr enc", "%d", rr);
-        myOpMode.telemetry.addData("avg enc", "%d", avg);
+        myOpMode.telemetry.addData("drive enc", "fl=%d, rl=%d, fr=%d, rr=%d, avg=%d", fl, rl, fr, rr, avg);
 //        myOpMode.telemetry.update();
 
         return avg;

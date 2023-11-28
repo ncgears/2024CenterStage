@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.pidcontrollers.pidTurnControllerFtclib;
 import org.firstinspires.ftc.teamcode.pidcontrollers.pidElevatorController;
 import org.firstinspires.ftc.teamcode.pidcontrollers.pidTiltController;
 
-@TeleOp(name="FC Mecanum HW", group="JRB")
+@TeleOp(name="Comp TeleOp", group="JRB")
 public class fcMecanumFtclib extends OpMode {
     hwMecanumFtclib robot = new hwMecanumFtclib(this);
     ElapsedTime runtime = new ElapsedTime();

@@ -19,7 +19,7 @@ import org.firstinspires.ftc.vision.VisionPortal;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@Autonomous(name="Short Auton", group="JRB")
+@Autonomous(name="TEST Short Auton", group="JRB")
 public class
 autonJRB1 extends OpMode {
     boolean m_long_auton = false; //set true if this is the long auton
@@ -52,6 +52,9 @@ autonJRB1 extends OpMode {
     @Override
     public void init() {
         robot.init(hardwareMap);
+
+//        robot.setMotorInverted(false,true,true,false); //Not sure why its wrong only for auton.. This is a workaround.
+
         visionProcessor = new tseSaturationProcessor();
         try {
             visionPortal = VisionPortal.easyCreateWithDefaults(hardwareMap.get(WebcamName.class, "Webcam 1"), visionProcessor);
@@ -66,7 +69,8 @@ autonJRB1 extends OpMode {
                 .onExit( () -> {
                     m_turn_multiplier = (robot.alliance == Constants.Alliance.RED) ? -1.0 : 1.0; //If red alliance, turns are reversed
                 })
-                .transition( () -> (robot.alliance != Constants.Alliance.NONE))
+                .transitionWithPointerState( () -> (robot.alliance != Constants.Alliance.NONE), States.DRIVE_TO_SPIKE) //TODO: Comment this
+//                .transition( () -> (robot.alliance != Constants.Alliance.NONE))
                 .state(States.FIND_TSE) //Finds the team supplied element
                 .onEnter( () -> {
                     visionPortal.resumeStreaming();
@@ -89,12 +93,14 @@ autonJRB1 extends OpMode {
                 .onEnter( () -> { //actions to perform when entering state
                     elapsed.reset();
                     pid_driving = true;
-                    driveInchesPID(20);
+//                    driveInchesPID(20);
+                    driveInchesPID(30);
                 })
                 .onExit( () -> { //actions to perform when exiting state
                     pid_driving = false;
                 })
-                .transition( () -> (pid_driving && drivepid.atTarget()) )
+                .transitionWithPointerState( () -> (pid_driving && drivepid.atTarget()), States.TURN_TO_GOAL) //TODO: Comment this
+//                .transition( () -> (pid_driving && drivepid.atTarget()) )
                 .state(States.TURN_TO_PIXEL)
                 .onEnter( () -> {
                     pid_turning = true;
@@ -160,12 +166,13 @@ autonJRB1 extends OpMode {
                 .state(States.TURN_TO_GOAL) //create state
                 .onEnter( () -> { //actions to perform when entering state
                     pid_turning = true;
-                    turnToPID(90 * m_turn_multiplier);
+                    turnToPID((90 * m_turn_multiplier));
                 })
                 .onExit( () -> { //actions to perform when exiting state
                     pid_turning = false;
                 })
-                .transition( () -> (pid_turning && turnpid.atTarget(robot.getRobotYaw())) )
+                .transitionWithPointerState( () -> (false && pid_turning && turnpid.atTarget(robot.getRobotYaw())), States.RESTING) //TODO: Comment this
+//                .transition( () -> (pid_turning && turnpid.atTarget(robot.getRobotYaw())) )
                 .state(States.DRIVE_TO_MID) //create state
                 .onEnter( () -> { //actions to perform when entering state
                     pid_driving = true;
@@ -276,7 +283,8 @@ autonJRB1 extends OpMode {
     }
 
     public void autonDrive(double fwd, double strafe, double turn, double headingDegrees) {
-        robot.drive.driveFieldCentric(fwd,strafe,turn,headingDegrees);
+//        robot.drive.driveFieldCentric(strafe,fwd,turn,headingDegrees);
+        robot.drive.driveRobotCentric(strafe,fwd,turn);
     }
 
     public void runCommand(Constants.Commands command) {
@@ -307,10 +315,12 @@ autonJRB1 extends OpMode {
     }
 
     public void turnToPID(double targetAngle) {
-        pid_turn_target = turnpid.update(robot.getRobotYaw());
+        pid_turning = true;
+        pid_turn_target = targetAngle;
     }
 
     public void driveInchesPID(double targetInches) {
+        robot.resetAllDriveEncoder();
         pid_drive_target = targetInches * Constants.Drivetrain.driveController.ticksPerInch + robot.getDriveAvgPosition();
     }
 
@@ -334,6 +344,8 @@ autonJRB1 extends OpMode {
         telemetry.addData("TSE Location", m_tse.toString());
         telemetry.addData("Pixel Dropper", robot.getPixelPosition().toString());
         telemetry.addData("Manipulator Position", m_manip_pos.toString());
+        telemetry.addData("Auton State", machine.getState().toString());
+        robot.getDriveAvgPosition(); //put the encoder data on the telem
         telemetry.addData("Tilt", "lim=%s, tgt=%.0f, pos=%d, pwr=%.2f", robot.getTiltLimitString(), tiltpid.getTarget(), robot.getTiltPosition(), robot.getTiltPower());
         telemetry.addData("Elev", "lim=%s, tgt=%.0f, pos=%d, pwr=%.2f", robot.getElevatorLimitString(), elevpid.getTarget(), robot.getElevatorPosition(), robot.getElevatorPower());
         if(idle) { //items that are only in idle

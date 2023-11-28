@@ -7,7 +7,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.processors.tseSaturationProcessor;
 import org.firstinspires.ftc.vision.VisionPortal;
 
-@Autonomous(name="SimpleOpenCV")
+@Autonomous(name="Test - OpenCV")
 public class SimpleOpenCV extends OpMode {
     private tseSaturationProcessor visionProcessor;
     private VisionPortal visionPortal;

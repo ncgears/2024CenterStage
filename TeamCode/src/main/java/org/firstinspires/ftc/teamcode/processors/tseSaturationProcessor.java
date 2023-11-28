@@ -13,9 +13,11 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 public class tseSaturationProcessor implements VisionProcessor {
-    public Rect rectLeft = new Rect(10,100,200,200);
+    //since the camera is upside down, right is left and left is right
+    //this is more efficient than rotating the camera orientation which has a lot of overhead
+    public Rect rectRight = new Rect(10,100,200,200);
     public Rect rectMiddle = new Rect(220, 100, 200, 200);
-    public Rect rectRight = new Rect(430, 100, 200, 200);
+    public Rect rectLeft = new Rect(430, 100, 200, 200);
     Selected selection = Selected.NONE;
 
     Mat submat = new Mat();

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -8,6 +9,7 @@ import org.firstinspires.ftc.teamcode.processors.tseSaturationProcessor;
 import org.firstinspires.ftc.vision.VisionPortal;
 
 @Autonomous(name="Test - OpenCV")
+@Disabled
 public class SimpleOpenCV extends OpMode {
     private tseSaturationProcessor visionProcessor;
     private VisionPortal visionPortal;

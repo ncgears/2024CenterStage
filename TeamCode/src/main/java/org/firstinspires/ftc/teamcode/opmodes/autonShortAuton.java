@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import android.util.Size;
+
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -41,6 +43,7 @@ autonShortAuton extends OpMode {
 
     private tseSaturationProcessor visionProcessor;
     private VisionPortal visionPortal;
+    boolean searchTSE = false;
     tseSaturationProcessor.Selected m_tse = tseSaturationProcessor.Selected.NONE;
 
     // States for the finite state machine
@@ -55,7 +58,14 @@ autonShortAuton extends OpMode {
 
         visionProcessor = new tseSaturationProcessor();
         try {
-            visionPortal = VisionPortal.easyCreateWithDefaults(hardwareMap.get(WebcamName.class, "Webcam 1"), visionProcessor);
+//            visionPortal = VisionPortal.easyCreateWithDefaults(hardwareMap.get(WebcamName.class, "Webcam 1"), visionProcessor);
+            visionPortal = new VisionPortal.Builder()
+                    .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                    .addProcessor(visionProcessor)
+                    .setCameraResolution(new Size(640, 480))
+                    .enableLiveView(true)
+                    .setAutoStopLiveView(true)
+                    .build();
         } catch (Exception e) {
         }
 
@@ -67,21 +77,23 @@ autonShortAuton extends OpMode {
                 .onExit( () -> {
                     m_turn_multiplier = (robot.alliance == Constants.Alliance.RED) ? -1.0 : 1.0; //If red alliance, turns are reversed
                 })
-                .transitionWithPointerState( () -> (robot.alliance != Constants.Alliance.NONE), States.DRIVE_TO_SPIKE) //TODO: Comment this
+                .transitionWithPointerState( () -> (robot.alliance != Constants.Alliance.NONE), States.FIND_TSE) //TODO: Comment this
 //                .transition( () -> (robot.alliance != Constants.Alliance.NONE))
                 .state(States.FIND_TSE) //Finds the team supplied element
                 .onEnter( () -> {
                     visionPortal.resumeStreaming();
                     //The TSE processor continuously tries to set the selected window
+                    searchTSE = true;
                     m_tse = visionProcessor.getSelection();
                     if(m_tse != tseSaturationProcessor.Selected.NONE) { //Unknown TSE location, try to find it
                         telemetry.addLine("Vision Processor identified TSE");
                     }
                 })
                 .onExit( () -> {
+                    searchTSE = false;
                     visionPortal.stopStreaming(); //stop streaming once we we know TSE location
                 })
-                .transition( () -> (m_tse != tseSaturationProcessor.Selected.NONE))
+                .transition( () -> (false && m_tse != tseSaturationProcessor.Selected.NONE))
                 .state(States.MANIP_TRANSPORT)
                 .onEnter( () -> {
                     m_manip_pos = Constants.Manipulator.Positions.TRANSPORT;
@@ -241,6 +253,9 @@ autonShortAuton extends OpMode {
     @Override
     public void loop() {
         machine.update();
+
+        // Monitor for TSE
+        if(searchTSE) m_tse = visionProcessor.getSelection();
 
         // Monitor for buttons
         if(robot.driverOp.getButton(GamepadKeys.Button.BACK)) runCommand(Constants.Commands.GYRO_RESET);

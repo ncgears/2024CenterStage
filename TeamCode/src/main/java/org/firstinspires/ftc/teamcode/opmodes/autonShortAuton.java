@@ -62,7 +62,7 @@ autonShortAuton extends OpMode {
             visionPortal = new VisionPortal.Builder()
                     .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                     .addProcessor(visionProcessor)
-                    .setCameraResolution(new Size(640, 480))
+                    .setCameraResolution(new Size(800, 600))
                     .enableLiveView(true)
                     .setAutoStopLiveView(true)
                     .build();

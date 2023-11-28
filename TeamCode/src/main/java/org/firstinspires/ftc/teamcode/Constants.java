@@ -27,6 +27,7 @@ public class Constants {
             public static double ticksPerInch = ticksPerMM * 25.4;
             public static double targetThreshold = 0.5; //how many inches is close enough
             public static double targetThresholdTicks = targetThreshold * ticksPerInch;
+            public static double kF = 0.15; //0.0 //minimum power to move the robot
             public static double kP = 0.0005;
             public static double kI = 0.0;
             public static double kD = 0.003;

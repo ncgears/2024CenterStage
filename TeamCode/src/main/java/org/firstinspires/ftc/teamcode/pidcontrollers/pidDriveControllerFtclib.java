@@ -7,18 +7,19 @@ import org.firstinspires.ftc.teamcode.Constants;
 
 public class pidDriveControllerFtclib {
     private double targetTicks;
-    private double kP, kI, kD;
+    private double kP, kI, kD, kF;
     private double accumulatedError = 0.0;
     private ElapsedTime timer = new ElapsedTime();
     private double lastError, lastTime = 0.0;
     private OpMode myOpMode = null;
 
-    public pidDriveControllerFtclib(OpMode opmode, double target, double p, double i, double d) {
+    public pidDriveControllerFtclib(OpMode opmode, double target, double p, double i, double d, double f) {
         myOpMode = opmode;
         targetTicks = target;
         kP = p;
         kI = i;
         kD = d;
+        kF = f;
     }
     public double update(double currentTicks) {
         //P - Proportional - This determines the error that we will multiply by our constant to set power
@@ -43,7 +44,7 @@ public class pidDriveControllerFtclib {
         lastError = error;
 
         //Motor Power calculation
-        double motorPower = 0.1 * Math.signum(error) + 0.9 * Math.tanh(
+        double motorPower = kF * Math.signum(error) + (1.0 - kF) * Math.tanh(
                 (kP * error) + (kI * accumulatedError) + (kD * slope)
         );
         return motorPower;

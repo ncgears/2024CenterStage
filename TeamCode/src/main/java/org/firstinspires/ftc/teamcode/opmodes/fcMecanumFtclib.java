@@ -43,7 +43,7 @@ public class fcMecanumFtclib extends OpMode {
     // repeatedly until driver presses play
     @Override
     public void init_loop() {
-        if(m_last_command == "NONE" && robot.alliance == Constants.Alliance.NONE) telemCommand("DETERMINE TEAM"); //determine team and store it
+        if(m_last_command == "NONE" || robot.alliance == Constants.Alliance.NONE) telemCommand("DETERMINE TEAM"); //determine team and store it
         // always listen for gyro reset button
         if(robot.driverOp.getButton(GamepadKeys.Button.BACK) && runtime.seconds() - m_last_command_time > 0.5) {
             robot.imu.resetYaw();

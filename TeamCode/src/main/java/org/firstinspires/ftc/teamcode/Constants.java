@@ -72,23 +72,23 @@ public class Constants {
             //tilt = (double) position of the tilt, in encoder counts, from the low limit switch reference
             //elevator = (double) length of the elevator, in inches
             //distance = (double) robot distance from backstage (-1 if not used)
-            START(10,0.0,-1.0),
-            TRANSPORT(555,0.0,-1.0),
-            FLOOR_CLOSE(10,0.0,-1.0),
-            FLOOR_FAR(100,2.0,-1.0),
-            FLOOR_DESTACK(175,3.0,-1.0),
-            SCORE_ROW1(975,10,0.0),
-            SCORE_DROP1(650,10,0.0),
-            SCORE_ROW2(975,13,0.0),
-            SCORE_DROP2(650,13,0.0),
-            SCORE_ROW3(975,16,0.0),
-            SCORE_DROP3(650,16,0.0),
-            //SCORE_ROWX(975,12,0.0),
-            //SCORE_DROPX(775,12,0.0),
-            CLIMB_READY(1200,7.0,-1.0),
-            CLIMB_UP(1200,22,-1.0),
-            CLIMB_LIFT(1200,1.5,-1.0),
-            CLIMB_VERT(50, 1.0, -1.0);
+            START(30,0.0,-1.0),
+            TRANSPORT(1750,0.0,-1.0),
+            FLOOR_CLOSE(30,0.0,-1.0),
+            FLOOR_FAR(300,2.0,-1.0),
+            FLOOR_DESTACK(525,3.0,-1.0),
+            SCORE_ROW1(2925,10,0.0),
+            SCORE_DROP1(2400,10,0.0),
+            SCORE_ROW2(2925,13,0.0),
+            SCORE_DROP2(2400,13,0.0),
+            SCORE_ROW3(2925,16,0.0),
+            SCORE_DROP3(2400,16,0.0),
+            //SCORE_ROWX(2925,12,0.0),
+            //SCORE_DROPX(1950,12,0.0),
+            CLIMB_READY(3600,7.0,-1.0),
+            CLIMB_UP(3600,22,-1.0),
+            CLIMB_LIFT(3600,1.5,-1.0),
+            CLIMB_VERT(150, 1.0, -1.0);
             final double tilt, elevator, distance;
             Positions(double tilt, double elevator, double distance) {
                 this.tilt = tilt;
@@ -100,17 +100,17 @@ public class Constants {
             public double getDistance() { return this.distance; }
         }
         public static class tiltController {
-            public static double offsetStepSize = 30; //amount to change offset per request
+            public static double offsetStepSize = 90; //amount to change offset per request
             public static double homingSpeed = 0.1; //speed for homing to limit
-            public static double targetThresholdTicks = 10; //how many encoder ticks is close enough
+            public static double targetThresholdTicks = 30; //how many encoder ticks is close enough
             public static double kF = 0.0; //0.0 //minimum power to move the motor
             public static double kP = 0.0015; //0.0015
-            public static double kI = 0.0000015; //0.0000015
+            public static double kI = 0.0000010; //0.0000015
             public static double kD = 0.002; //0.002
             public static class limits {
-                public static double maxOutput = 0.55; //maximum output power
+                public static double maxOutput = 0.75; //maximum output power
                 public static double minTicks = 0.0; //Minimum encoder ticks of target (at limit sw)
-                public static double maxTicks = 3000.0; //Maximum encoder ticks of target (at limit sw)
+                public static double maxTicks = 9000.0; //Maximum encoder ticks of target (at limit sw)
             }
         }
         public static class elevatorController {
@@ -124,9 +124,9 @@ public class Constants {
             public static double targetThreshold = 0.2; //how many inches is close enough
             public static double targetThresholdTicks = 50; //targetThreshold * ticksPerInch;
             public static double kF = 0.0; //0.0 //minimum power to move the motor
-            public static double kP = 0.0030; //0025
-            public static double kI = 0.000006; //000002
-            public static double kD = 0.001; //002
+            public static double kP = 0.0005; //0025
+            public static double kI = 0.000004; //000002
+            public static double kD = 0.002; //002
             public static class limits {
                 public static double maxOutput = 1.00; //maximum output power
                 public static double minLength = 0.0; //Minimum extended length of arm

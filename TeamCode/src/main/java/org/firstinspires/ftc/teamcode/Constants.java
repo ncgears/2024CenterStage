@@ -100,7 +100,7 @@ public class Constants {
             public double getDistance() { return this.distance; }
         }
         public static class tiltController {
-            public static double offsetStepSize = 10; //amount to change offset per request
+            public static double offsetStepSize = 30; //amount to change offset per request
             public static double homingSpeed = 0.1; //speed for homing to limit
             public static double targetThresholdTicks = 10; //how many encoder ticks is close enough
             public static double kF = 0.0; //0.0 //minimum power to move the motor
@@ -110,11 +110,11 @@ public class Constants {
             public static class limits {
                 public static double maxOutput = 0.55; //maximum output power
                 public static double minTicks = 0.0; //Minimum encoder ticks of target (at limit sw)
-                public static double maxTicks = 1210.0; //Maximum encoder ticks of target (at limit sw)
+                public static double maxTicks = 3000.0; //Maximum encoder ticks of target (at limit sw)
             }
         }
         public static class elevatorController {
-            public static double offsetStepSize = 10; //amount to change offset per request
+            public static double offsetStepSize = 200; //amount to change offset per request
             public static double homingSpeed = 0.1; //speed for homing to limit
             public static double ticksPerRev = 28;
             public static double gearReduction = 100;

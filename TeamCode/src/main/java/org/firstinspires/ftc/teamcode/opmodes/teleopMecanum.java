@@ -25,6 +25,7 @@ public class teleopMecanum extends OpMode {
     boolean m_manip_manual = false;
     String m_last_command = Constants.Commands.NONE.toString();
     double m_last_command_time = 0.0;
+    double m_turn_multiplier = 1.0;
 
     double drive_fwd, drive_strafe, drive_turn = 0.0; //used for holding requested drive values
     double pid_turn_target = 0; //target degrees for pid turn
@@ -65,6 +66,7 @@ public class teleopMecanum extends OpMode {
     @Override
     public void start() {
         runtime.reset();
+        m_turn_multiplier = (robot.alliance == Constants.Alliance.RED) ? -1.0 : 1.0;
     }
 
     @Override
@@ -128,11 +130,11 @@ public class teleopMecanum extends OpMode {
         // automated field-relative turn functions for d-pad
         if (robot.driverOp.getButton(GamepadKeys.Button.DPAD_LEFT) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_DOWN) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_UP)) {
             //left, but not up or down
-            turnToPID(90);
+            turnToPID(90 * m_turn_multiplier);
             telemCommand("PID TURN FC 90");
         } else if (robot.driverOp.getButton(GamepadKeys.Button.DPAD_RIGHT) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_DOWN) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_UP)) {
             //right, but not up or down
-            turnToPID(-90);
+            turnToPID(-90 * m_turn_multiplier);
             telemCommand("PID TURN FC -90");
         } else if (robot.driverOp.getButton(GamepadKeys.Button.DPAD_UP) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_LEFT) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_RIGHT)) {
             //up, but not left or right

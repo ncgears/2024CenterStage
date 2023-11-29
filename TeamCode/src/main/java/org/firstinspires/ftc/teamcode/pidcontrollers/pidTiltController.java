@@ -85,9 +85,11 @@ public class pidTiltController {
 
     public void increaseOffset() {
         offset += Constants.Manipulator.tiltController.offsetStepSize;
+        setTarget(targetTicks);
     }
     public void decreaseOffset() {
         offset -= Constants.Manipulator.tiltController.offsetStepSize;
+        setTarget(targetTicks);
     }
 
 }

@@ -77,8 +77,8 @@ autonShortAuton extends OpMode {
                 .onExit( () -> {
                     m_turn_multiplier = (robot.alliance == Constants.Alliance.RED) ? -1.0 : 1.0; //If red alliance, turns are reversed
                 })
-                .transitionWithPointerState( () -> (robot.alliance != Constants.Alliance.NONE), States.FIND_TSE) //TODO: Comment this
-//                .transition( () -> (robot.alliance != Constants.Alliance.NONE))
+//                .transitionWithPointerState( () -> (robot.alliance != Constants.Alliance.NONE), States.FIND_TSE) //TODO: Comment this
+                .transition( () -> (robot.alliance != Constants.Alliance.NONE))
                 .state(States.FIND_TSE) //Finds the team supplied element
                 .onEnter( () -> {
                     visionPortal.resumeStreaming();
@@ -93,7 +93,7 @@ autonShortAuton extends OpMode {
                     searchTSE = false;
                     visionPortal.stopStreaming(); //stop streaming once we we know TSE location
                 })
-                .transition( () -> (false && m_tse != tseSaturationProcessor.Selected.NONE))
+                .transition( () -> (m_tse != tseSaturationProcessor.Selected.NONE))
                 .state(States.MANIP_TRANSPORT)
                 .onEnter( () -> {
                     m_manip_pos = Constants.Manipulator.Positions.TRANSPORT;
@@ -109,8 +109,8 @@ autonShortAuton extends OpMode {
                 .onExit( () -> { //actions to perform when exiting state
                     pid_driving = false;
                 })
-                .transitionWithPointerState( () -> (pid_driving && drivepid.atTarget()), States.TURN_TO_GOAL) //TODO: Comment this
-//                .transition( () -> (pid_driving && drivepid.atTarget()) )
+//                .transitionWithPointerState( () -> (pid_driving && drivepid.atTarget()), States.TURN_TO_GOAL) //TODO: Comment this
+                .transition( () -> (pid_driving && drivepid.atTarget()) )
                 .state(States.TURN_TO_PIXEL)
                 .onEnter( () -> {
                     pid_turning = true;
@@ -135,7 +135,7 @@ autonShortAuton extends OpMode {
                     pid_driving = true;
                     switch (m_tse) {
                         case LEFT:
-                            driveInchesPID(-3);
+                            driveInchesPID(0);
                             break;
                         case RIGHT:
                             driveInchesPID(5);
@@ -159,7 +159,7 @@ autonShortAuton extends OpMode {
                     pid_driving = true;
                     switch (m_tse) {
                         case LEFT:
-                            driveInchesPID(3);
+                            driveInchesPID(0);
                             break;
                         case RIGHT:
                             driveInchesPID(-5);

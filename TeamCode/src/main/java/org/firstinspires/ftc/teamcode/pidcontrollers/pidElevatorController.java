@@ -97,8 +97,10 @@ public class pidElevatorController {
 
     public void increaseOffset() {
         offset += Constants.Manipulator.elevatorController.offsetStepSize;
+        setTarget(targetTicks);
     }
     public void decreaseOffset() {
         offset -= Constants.Manipulator.elevatorController.offsetStepSize;
+        setTarget(targetTicks);
     }
 }

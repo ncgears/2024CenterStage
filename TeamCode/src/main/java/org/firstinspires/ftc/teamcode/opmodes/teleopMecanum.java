@@ -33,6 +33,8 @@ public class teleopMecanum extends OpMode {
     pidTurnControllerFtclib turnpid = new pidTurnControllerFtclib(this, pid_turn_target, Constants.Drivetrain.turnController.kP, Constants.Drivetrain.turnController.kI, Constants.Drivetrain.turnController.kD, Constants.Drivetrain.turnController.kF);
     pidTiltController tiltpid = new pidTiltController(this, m_manip_pos.getTilt(), Constants.Manipulator.tiltController.kP, Constants.Manipulator.tiltController.kI, Constants.Manipulator.tiltController.kD, Constants.Manipulator.tiltController.kF);
     pidElevatorController elevpid = new pidElevatorController(this, m_manip_pos.getElevator(), Constants.Manipulator.elevatorController.kP, Constants.Manipulator.elevatorController.kI, Constants.Manipulator.elevatorController.kD, Constants.Manipulator.elevatorController.kF);
+    boolean tilt_low_limit = false;
+
 
     boolean pressed_rb, pressed_lb, pressed_up, pressed_dn, pressed_lt, pressed_rt = false; //for debouncing button presses
 
@@ -114,36 +116,36 @@ public class teleopMecanum extends OpMode {
             }
             telemCommand("STARTING CONFIG");
         } else if (robot.driverOp.getButton(GamepadKeys.Button.Y)) {
-            m_manip_pos = Constants.Manipulator.Positions.CLIMB_READY;
-            telemCommand("CLIMB READY");
+            //up, but not left or right
+            turnToPID(0);
+            telemCommand("PID TURN FC 0");
         } else if (robot.driverOp.getButton(GamepadKeys.Button.B)) {
-            m_manip_pos = Constants.Manipulator.Positions.CLIMB_UP;
-            telemCommand("CLIMB READY");
+            //right, but not up or down
+            turnToPID(-90 * m_turn_multiplier);
+            telemCommand("PID TURN FC -90");
         } else if (robot.driverOp.getButton(GamepadKeys.Button.A)) {
-            m_manip_pos = Constants.Manipulator.Positions.CLIMB_LIFT;
-            telemCommand("CLIMB LIFT");
+            //down, but not left or right
+            turnToPID(180);
+            telemCommand("PID TURN FC 180");
         } else if (robot.driverOp.getButton(GamepadKeys.Button.X)) {
-            m_manip_pos = Constants.Manipulator.Positions.CLIMB_VERT;
-            telemCommand("CLIMB VERT");
+            //left, but not up or down
+            turnToPID(90 * m_turn_multiplier);
+            telemCommand("PID TURN FC 90");
         }
 
         // automated field-relative turn functions for d-pad
         if (robot.driverOp.getButton(GamepadKeys.Button.DPAD_LEFT) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_DOWN) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_UP)) {
-            //left, but not up or down
-            turnToPID(90 * m_turn_multiplier);
-            telemCommand("PID TURN FC 90");
+            m_manip_pos = Constants.Manipulator.Positions.CLIMB_VERT;
+            telemCommand("CLIMB VERT");
         } else if (robot.driverOp.getButton(GamepadKeys.Button.DPAD_RIGHT) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_DOWN) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_UP)) {
-            //right, but not up or down
-            turnToPID(-90 * m_turn_multiplier);
-            telemCommand("PID TURN FC -90");
+            m_manip_pos = Constants.Manipulator.Positions.CLIMB_UP;
+            telemCommand("CLIMB READY");
         } else if (robot.driverOp.getButton(GamepadKeys.Button.DPAD_UP) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_LEFT) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_RIGHT)) {
-            //up, but not left or right
-            turnToPID(0);
-            telemCommand("PID TURN FC 0");
+            m_manip_pos = Constants.Manipulator.Positions.CLIMB_READY;
+            telemCommand("CLIMB READY");
         } else if (robot.driverOp.getButton(GamepadKeys.Button.DPAD_DOWN) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_LEFT) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_RIGHT)) {
-            //down, but not left or right
-            turnToPID(180);
-            telemCommand("PID TURN FC 180");
+            m_manip_pos = Constants.Manipulator.Positions.CLIMB_LIFT;
+            telemCommand("CLIMB LIFT");
         }
         /** End Driver Controls */
 
@@ -310,9 +312,18 @@ public class teleopMecanum extends OpMode {
     }
 
     public void moveTilt() {
-        tiltpid.setTargetPosition(m_manip_pos);
-        double power = tiltpid.update(robot.getTiltPosition());
-        robot.setTiltPower(power);
+        if(tilt_low_limit) {
+            tiltpid.setTarget(robot.getTiltPosition());
+            tilt_low_limit = false;
+        } else {
+            tiltpid.setTargetPosition(m_manip_pos);
+            double power = tiltpid.update(robot.getTiltPosition());
+            if(power < 0 && robot.getTiltLowLimit()) {
+                tiltpid.setTarget(robot.getTiltPosition());
+                tilt_low_limit = true;
+            }
+            robot.setTiltPower(power);
+        }
     }
 
     public void moveElevator() {

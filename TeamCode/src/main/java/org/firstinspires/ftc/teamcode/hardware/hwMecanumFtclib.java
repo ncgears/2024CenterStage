@@ -304,6 +304,14 @@ public class hwMecanumFtclib {
         return (lim=="") ? "O" : lim;
     }
     public void setTiltPower(double power) {
+        if(power < 0 && getTiltLowLimit()) {
+            myOpMode.telemetry.addLine("ERROR: Tilt is at low limit");
+            power = 0;
+        }
+        if(power > 0 && getTiltHighLimit()) {
+            myOpMode.telemetry.addLine("ERROR: Tilt is at high limit");
+            power = 0;
+        }
         m_tilt_motor.set(power);
     }
     public void homeTilt() {

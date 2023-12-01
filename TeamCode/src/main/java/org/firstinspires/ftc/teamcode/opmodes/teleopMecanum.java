@@ -223,6 +223,9 @@ public class teleopMecanum extends OpMode {
         } else if (robot.operOp.getButton(GamepadKeys.Button.A)) { //floor pickup
             m_manip_pos = Constants.Manipulator.Positions.FLOOR_CLOSE;
             telemCommand("FLOOR PICKUP");
+        } else if (robot.operOp.getButton(GamepadKeys.Button.START)) {
+            robot.setDronePosition(Constants.DroneLauncher.Positions.LAUNCH);
+            telemCommand("LAUNCH DRONE");
         } else if (pressed_rb && !robot.operOp.getButton(GamepadKeys.Button.RIGHT_BUMPER)) { //released the button
             pressed_rb = false;
         } else if (pressed_lb && !robot.operOp.getButton(GamepadKeys.Button.LEFT_BUMPER)) { //released the button

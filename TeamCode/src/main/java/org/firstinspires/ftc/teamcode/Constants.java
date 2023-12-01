@@ -53,7 +53,7 @@ public class Constants {
     public static class DroneLauncher {
         public enum Positions {
             ARMED(0.0),
-            LAUNCH(20.0);
+            LAUNCH(10);
             private final double angle;
             Positions(double angle) { this.angle = angle; }
             public double getAngle() { return this.angle; }
@@ -74,7 +74,7 @@ public class Constants {
             //distance = (double) robot distance from backstage (-1 if not used)
             START(30,0.0,-1.0),
             TRANSPORT(1750,0.0,-1.0),
-            FLOOR_CLOSE(30,0.0,-1.0),
+            FLOOR_CLOSE(50,0.0,-1.0),
             FLOOR_FAR(300,2.0,-1.0),
             FLOOR_DESTACK(525,3.0,-1.0),
             SCORE_ROW1(2925,10,0.0),

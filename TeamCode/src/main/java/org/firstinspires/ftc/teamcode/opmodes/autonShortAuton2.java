@@ -220,8 +220,6 @@ autonShortAuton2 extends OpMode {
                     pid_driving = false;
                 })
                 .transition( () -> (pid_driving && drivepid.atTarget()) )
-
-//TODO finish auton routine
                 .state(States.MANIP_SCORE)
                 .onEnter( () -> {
                     m_manip_pos = Constants.Manipulator.Positions.SCORE_AUTO;
@@ -246,6 +244,13 @@ autonShortAuton2 extends OpMode {
                     m_manip_pos = Constants.Manipulator.Positions.SCORE_AUTO;
                 })
                 .transitionTimed(1.5)
+                .state(States.STRAFE_CLEAR)
+                .onEnter( () -> {
+                    robot.playAudio("Get out the way",500);
+                    //STRAFE sideways to clear the board
+                    autonDrive(0, Constants.Auton.autonDriveSpeed * m_turn_multiplier, 0, robot.getRobotYaw());
+                })
+                .transitionTimed(2.5)
                 .state(States.RESTING) //create state
                 .onEnter( () -> { //actions to perform when entering state
                     pid_driving = false;

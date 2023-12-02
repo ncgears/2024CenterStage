@@ -8,7 +8,7 @@ public class Constants {
     public static class Global {
     }
     public static class Auton {
-        public static double autonDriveSpeed = 0.3;
+        public static double autonDriveSpeed = 0.5;
     }
     public static class Drivetrain {
         public static boolean useFieldCentric = true; //try to use FC if gyro has value

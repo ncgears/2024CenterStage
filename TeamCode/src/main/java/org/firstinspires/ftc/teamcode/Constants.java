@@ -16,7 +16,7 @@ public class Constants {
             public static double targetThreshold = 2.0; //how many degrees is close enough
             public static double kF = 0.15; //0.0 //minimum power to move the robot
             public static double kP = 0.01;
-            public static double kI = 0.0;
+            public static double kI = 0.00075;
             public static double kD = 0.003;
             public static class limits {
                 public static double maxOutput = 0.55; //maximum output power
@@ -33,7 +33,7 @@ public class Constants {
             public static double targetThresholdTicks = targetThreshold * ticksPerInch;
             public static double kF = 0.15; //0.0 //minimum power to move the robot
             public static double kP = 0.0005;
-            public static double kI = 0.0;
+            public static double kI = 0.00002;
             public static double kD = 0.003;
             public static class limits {
                 public static double maxOutput = 0.55; //maximum output power
@@ -77,6 +77,8 @@ public class Constants {
             FLOOR_CLOSE(50,0.0,-1.0),
             FLOOR_FAR(300,2.0,-1.0),
             FLOOR_DESTACK(525,3.0,-1.0),
+            SCORE_AUTO(2925,4.25,0.0),
+            SCORE_AUTODROP(2400,4.5,0.0),
             SCORE_ROW1(2925,10,0.0),
             SCORE_DROP1(2400,10,0.0),
             SCORE_ROW2(2925,13,0.0),
@@ -85,10 +87,10 @@ public class Constants {
             SCORE_DROP3(2400,16,0.0),
             //SCORE_ROWX(2925,12,0.0),
             //SCORE_DROPX(1950,12,0.0),
-            CLIMB_READY(3600,7.0,-1.0),
-            CLIMB_UP(3600,22,-1.0),
-            CLIMB_LIFT(3600,1.5,-1.0),
-            CLIMB_VERT(150, 1.0, -1.0);
+            CLIMB_READY(3500,7.0,-1.0),
+            CLIMB_UP(3500,22,-1.0),
+            CLIMB_LIFT(3500,1.5,-1.0),
+            CLIMB_VERT(150, 1.5, -1.0);
             final double tilt, elevator, distance;
             Positions(double tilt, double elevator, double distance) {
                 this.tilt = tilt;

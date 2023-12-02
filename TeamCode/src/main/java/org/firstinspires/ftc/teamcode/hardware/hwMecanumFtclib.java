@@ -97,6 +97,9 @@ public class hwMecanumFtclib {
     // Distance sensor
     public SensorRevTOFDistance m_distance = null;
 
+    // Audio Telemetry
+    public boolean isSpeaking = false;
+
     // Define Drive constants.  Make them public so they CAN be used by the calling OpMode
 
     /* Local OpMode members. */
@@ -370,13 +373,15 @@ public class hwMecanumFtclib {
 
     // Distance Sensor Methods
     public double getDistance() {
+        if(m_distance.getDistance(DistanceUnit.INCH) > 40) return -1.0;
         return m_distance.getDistance(DistanceUnit.INCH);
     }
 
     // Driver Station Audio
-    public void playAudio(String text) {
+    public void playAudio(String text, int delayMs) {
         try {
             myOpMode.telemetry.speak(text);
+            wait(delayMs);
         } catch (Exception e) {}
     }
 

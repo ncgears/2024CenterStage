@@ -79,7 +79,15 @@
     <!-- ======================================================================================= -->
 
     <!-- Logitech HD Webcam C310, Calibrated by by Robert Atkinson, 2018.05.30 using 3DF Zephyr -->
-    <!-- <Camera vid="Logitech" pid="0x081B">
+<!--    <Camera vid="Logitech" pid="0x081B">
+
+        <Calibration
+            size="800 600"
+            focalLength="821.993f, 821.993f"
+            principalPoint="330.489f, 248.997f"
+            distortionCoefficients="-0.018522, 1.03979, 0, 0, -3.3171, 0, 0, 0"
+            />
+
         <Calibration
             size="640 480"
             focalLength="821.993f, 821.993f"
@@ -93,8 +101,8 @@
             principalPoint="319.759f, 188.917f"
             distortionCoefficients="-0.0258948, 1.06258, 0, 0, -3.40245, 0, 0, 0"
             />
-    </Camera> -->
-
+    </Camera>
+-->
     <!-- ======================================================================================= -->
 
     <!-- Logitech HD Pro Webcam C920, Calibrated by Robert Atkinson, 2018.05.30 using 3DF Zephyr -->
@@ -147,15 +155,16 @@
     <!-- ======================================================================================= -->
 
     <!-- Logitech HD Webcam C270, Calibrated by Noah Andrews, 2019.03.13 using 3DF Zephyr -->
-    <!--<Camera vid="Logitech" pid="0x0825">
+    <!--
+    <Camera vid="Logitech" pid="0x0825">
         <Calibration
             size="640 480"
             focalLength="822.317f, 822.317f"
             principalPoint="319.495f, 242.502f"
             distortionCoefficients="-0.0449369, 1.17277, 0, 0, -3.63244, 0, 0, 0"
             />
-    </Camera> -->
-
+    </Camera>
+-->
     <!-- ======================================================================================= -->
 
 </Calibrations>

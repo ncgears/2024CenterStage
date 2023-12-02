@@ -76,7 +76,7 @@ autonShortAuton extends OpMode {
                 })
                 .onExit( () -> {
                     m_turn_multiplier = (robot.alliance == Constants.Alliance.RED) ? -1.0 : 1.0; //If red alliance, turns are reversed
-                    robot.playAudio(String.format("%s Alliance", robot.alliance.toString()));
+                    robot.playAudio(String.format("%s Alliance", robot.alliance.toString()),500);
                 })
 //                .transitionWithPointerState( () -> (robot.alliance != Constants.Alliance.NONE), States.FIND_TSE) //TODO: Comment this
                 .transition( () -> (robot.alliance != Constants.Alliance.NONE))
@@ -93,10 +93,10 @@ autonShortAuton extends OpMode {
                 .onExit( () -> {
                     searchTSE = false;
                     visionPortal.stopStreaming(); //stop streaming once we we know TSE location
-                    robot.playAudio(String.format("Team prop at %s",m_tse.toString()));
+                    robot.playAudio(String.format("Team prop %s",m_tse.toString()),500);
                 })
-                .transitionWithPointerState( () -> (m_tse != tseSaturationProcessor.Selected.NONE), States.RESTING) //TODO: Comment this
-//                .transition( () -> (m_tse != tseSaturationProcessor.Selected.NONE))
+//                .transitionWithPointerState( () -> (m_tse != tseSaturationProcessor.Selected.NONE), States.RESTING) //TODO: Comment this
+                .transition( () -> (m_tse != tseSaturationProcessor.Selected.NONE))
                 .state(States.MANIP_TRANSPORT)
                 .onEnter( () -> {
                     m_manip_pos = Constants.Manipulator.Positions.TRANSPORT;
@@ -104,30 +104,30 @@ autonShortAuton extends OpMode {
                 .transition(() -> (true))
                 .state(States.DRIVE_TO_SPIKE) //create state
                 .onEnter( () -> { //actions to perform when entering state
-                    robot.playAudio("Drive to Spike");
+//                    robot.playAudio("Drive Spike",500);
                     pid_driving = true;
 //                    driveInchesPID(20);
-                    driveInchesPID(30);
+                    driveInchesPID(26);
                 })
                 .onExit( () -> { //actions to perform when exiting state
                     pid_driving = false;
                 })
-//                .transitionWithPointerState( () -> (pid_driving && drivepid.atTarget()), States.TURN_TO_GOAL) //TODO: Comment this
+//                .transitionWithPointerState( () -> (pid_driving && drivepid.atTarget()), States.RESTING) //TODO: Comment this
                 .transition( () -> (pid_driving && drivepid.atTarget()) )
                 .state(States.TURN_TO_PIXEL)
                 .onEnter( () -> {
                     pid_turning = true;
                     switch (m_tse) {
                         case LEFT:
-                            robot.playAudio("Turn to Pixel Left");
+                            robot.playAudio("Turn Pixel Left",500);
                             turnToPID(-90);
                             break;
                         case RIGHT:
-                            robot.playAudio("Turn to Pixel Right");
+                            robot.playAudio("Turn Pixel Right",500);
                             turnToPID(90);
                             break;
                         case MIDDLE:
-                            robot.playAudio("Turn to Pixel Middle");
+                            robot.playAudio("Turn Pixel Middle",500);
                             turnToPID(180);
                             break;
                     }
@@ -135,6 +135,8 @@ autonShortAuton extends OpMode {
                 .onExit( () -> {
                     pid_turning = false;
                 })
+//                .transitionWithPointerState( () -> (pid_turning && turnpid.atTarget(robot.getRobotYaw())), States.RESTING) //TODO: Comment this
+//                .transitionTimed(2.0)
                 .transition( () -> (pid_turning && turnpid.atTarget(robot.getRobotYaw())))
                 .state(States.DRIVE_TO_PIXEL)
                 .onEnter( () -> {
@@ -157,7 +159,7 @@ autonShortAuton extends OpMode {
                 .transition( () -> (pid_driving && drivepid.atTarget()) )
                 .state(States.DROP_PIXEL)
                 .onEnter( () -> {
-                    robot.playAudio("Drop Pixel");
+                    robot.playAudio("Drop Pixel",500);
                     robot.setPixelPosition(Constants.PixelDropper.Positions.UP);
                 })
                 .transitionTimed(0.5)
@@ -166,7 +168,7 @@ autonShortAuton extends OpMode {
                     pid_driving = true;
                     switch (m_tse) {
                         case LEFT:
-                            driveInchesPID(0);
+                            driveInchesPID(-16);
                             break;
                         case RIGHT:
                             driveInchesPID(-5);
@@ -182,23 +184,23 @@ autonShortAuton extends OpMode {
                 .transition( () -> (pid_driving && drivepid.atTarget()) )
                 .state(States.TURN_TO_GOAL) //create state
                 .onEnter( () -> { //actions to perform when entering state
-                    robot.playAudio("Turn toward backstage");
+                    robot.playAudio("Turn toward backstage",500);
                     pid_turning = true;
                     turnToPID((90 * m_turn_multiplier));
                 })
                 .onExit( () -> { //actions to perform when exiting state
                     pid_turning = false;
                 })
-                .transitionWithPointerState( () -> (pid_turning && turnpid.atTarget(robot.getRobotYaw())), States.RESTING) //TODO: Comment this
-//                .transition( () -> (pid_turning && turnpid.atTarget(robot.getRobotYaw())) )
+//                .transitionWithPointerState( () -> (pid_turning && turnpid.atTarget(robot.getRobotYaw())), States.RESTING) //TODO: Comment this
+                .transition( () -> (pid_turning && turnpid.atTarget(robot.getRobotYaw())) )
                 .state(States.DRIVE_TO_MID) //create state
                 .onEnter( () -> { //actions to perform when entering state
-                    robot.playAudio("Drive to midpoint");
+                    robot.playAudio("Drive to midpoint",500);
                     pid_driving = true;
                     if(m_long_auton) {
                         driveInchesPID(30); //drive past the bars
                     } else {
-                        driveInchesPID(2);
+                        driveInchesPID(0);
                     }
                 })
                 .onExit( () -> { //actions to perform when exiting state
@@ -207,14 +209,14 @@ autonShortAuton extends OpMode {
                 .transition( () -> (pid_driving && drivepid.atTarget()) )
                 .state(States.MANIP_SCORE)
                 .onEnter( () -> {
-                    m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW1;
+                    m_manip_pos = Constants.Manipulator.Positions.SCORE_AUTO;
                 })
-                .transition(() -> (true))
+                .transitionTimed(1.5)
                 .state(States.DRIVE_TO_GOAL) //create state
                 .onEnter( () -> { //actions to perform when entering state
-                    robot.playAudio("Drive to backstage");
+                    robot.playAudio("Drive to backstage",500);
                     pid_driving = true;
-                    driveInchesPID(30); //drive to the goal
+                    driveInchesPID(3); //drive to the goal
                 })
                 .onExit( () -> { //actions to perform when exiting state
                     pid_driving = false;
@@ -222,18 +224,18 @@ autonShortAuton extends OpMode {
                 .transition( () -> (pid_driving && drivepid.atTarget()) )
                 .state(States.MANIP_DROP)
                 .onEnter( () -> {
-                    robot.playAudio("Score Pixels");
-                    m_manip_pos = Constants.Manipulator.Positions.SCORE_DROP1;
+                    robot.playAudio("Score Pixels",500);
+                    m_manip_pos = Constants.Manipulator.Positions.SCORE_AUTODROP;
                 })
                 .onExit( () -> {
-                    m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW1;
+                    m_manip_pos = Constants.Manipulator.Positions.SCORE_AUTO;
                 })
                 .transitionTimed(1.5)
                 .state(States.RESTING) //create state
                 .onEnter( () -> { //actions to perform when entering state
                     pid_driving = false;
                     pid_turning = false;
-                    robot.playAudio("Resting");
+                    robot.playAudio("Resting",500);
                 })
                 .build();
     }

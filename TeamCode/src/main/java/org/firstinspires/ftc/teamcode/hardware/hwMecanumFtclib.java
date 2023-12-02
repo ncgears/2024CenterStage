@@ -373,4 +373,11 @@ public class hwMecanumFtclib {
         return m_distance.getDistance(DistanceUnit.INCH);
     }
 
+    // Driver Station Audio
+    public void playAudio(String text) {
+        try {
+            myOpMode.telemetry.speak(text);
+        } catch (Exception e) {}
+    }
+
 }

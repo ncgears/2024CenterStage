@@ -36,7 +36,8 @@ public class teleopMecanum extends OpMode {
     boolean tilt_low_limit = false;
 
 
-    boolean pressed_rb, pressed_lb, pressed_up, pressed_dn, pressed_lt, pressed_rt = false; //for debouncing button presses
+    boolean o_rb, o_lb, o_up, o_dn, o_lt, o_rt = false; //for debouncing operator button presses
+    boolean d_a, d_b, d_x, d_y = false; //for debouncing driver button presses
 
     @Override
     public void init() {
@@ -115,35 +116,47 @@ public class teleopMecanum extends OpMode {
                 m_manip_manual = false;
             }
             telemCommand("STARTING CONFIG");
-        } else if (robot.driverOp.getButton(GamepadKeys.Button.Y)) {
-            //up, but not left or right
+        } else if (!d_y && robot.driverOp.getButton(GamepadKeys.Button.Y)) {
+            d_y = true;
             turnToPID(0);
             telemCommand("PID TURN FC 0");
-        } else if (robot.driverOp.getButton(GamepadKeys.Button.B)) {
-            //right, but not up or down
+        } else if (!d_b && robot.driverOp.getButton(GamepadKeys.Button.B)) {
+            d_b = true;
             turnToPID(-90 * m_turn_multiplier);
             telemCommand("PID TURN FC -90");
-        } else if (robot.driverOp.getButton(GamepadKeys.Button.A)) {
-            //down, but not left or right
+        } else if (!d_a && robot.driverOp.getButton(GamepadKeys.Button.A)) {
+            d_a = true;
             turnToPID(180);
             telemCommand("PID TURN FC 180");
-        } else if (robot.driverOp.getButton(GamepadKeys.Button.X)) {
-            //left, but not up or down
+        } else if (!d_x && robot.driverOp.getButton(GamepadKeys.Button.X)) {
+            d_x = true;
             turnToPID(90 * m_turn_multiplier);
             telemCommand("PID TURN FC 90");
+        } else if (d_y && !robot.driverOp.getButton(GamepadKeys.Button.Y)) { //released the button
+            d_y = false;
+        } else if (d_b && !robot.driverOp.getButton(GamepadKeys.Button.B)) { //released the button
+            d_b = false;
+        } else if (d_a && !robot.driverOp.getButton(GamepadKeys.Button.A)) { //released the button
+            d_a = false;
+        } else if (d_x && !robot.driverOp.getButton(GamepadKeys.Button.X)) { //released the button
+            d_x = false;
         }
 
         // automated field-relative turn functions for d-pad
         if (robot.driverOp.getButton(GamepadKeys.Button.DPAD_LEFT) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_DOWN) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_UP)) {
+            //left, but not up or down
             m_manip_pos = Constants.Manipulator.Positions.CLIMB_VERT;
             telemCommand("CLIMB VERT");
         } else if (robot.driverOp.getButton(GamepadKeys.Button.DPAD_RIGHT) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_DOWN) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_UP)) {
+            //right, but not up or down
             m_manip_pos = Constants.Manipulator.Positions.CLIMB_UP;
             telemCommand("CLIMB READY");
         } else if (robot.driverOp.getButton(GamepadKeys.Button.DPAD_UP) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_LEFT) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_RIGHT)) {
+            //up, but not left or right
             m_manip_pos = Constants.Manipulator.Positions.CLIMB_READY;
             telemCommand("CLIMB READY");
         } else if (robot.driverOp.getButton(GamepadKeys.Button.DPAD_DOWN) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_LEFT) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_RIGHT)) {
+            //down, but not left or right
             m_manip_pos = Constants.Manipulator.Positions.CLIMB_LIFT;
             telemCommand("CLIMB LIFT");
         }
@@ -182,7 +195,7 @@ public class teleopMecanum extends OpMode {
                     break;
                 default:
             }
-        } else if (!pressed_rb && robot.operOp.getButton(GamepadKeys.Button.RIGHT_BUMPER)) { //position up
+        } else if (!o_rb && robot.operOp.getButton(GamepadKeys.Button.RIGHT_BUMPER)) { //position up
             switch (m_manip_pos) {
                 case SCORE_ROW1:
                     m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW2;
@@ -198,7 +211,7 @@ public class teleopMecanum extends OpMode {
                 default:
 //                        telemCommand("NOTHING");
             }
-        } else if (!pressed_lb && robot.operOp.getButton(GamepadKeys.Button.LEFT_BUMPER)) { //position down
+        } else if (!o_lb && robot.operOp.getButton(GamepadKeys.Button.LEFT_BUMPER)) { //position down
             switch (m_manip_pos) {
                 case SCORE_ROW3:
                     m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW2;
@@ -226,36 +239,36 @@ public class teleopMecanum extends OpMode {
         } else if (robot.operOp.getButton(GamepadKeys.Button.START)) {
             robot.setDronePosition(Constants.DroneLauncher.Positions.LAUNCH);
             telemCommand("LAUNCH DRONE");
-        } else if (pressed_rb && !robot.operOp.getButton(GamepadKeys.Button.RIGHT_BUMPER)) { //released the button
-            pressed_rb = false;
-        } else if (pressed_lb && !robot.operOp.getButton(GamepadKeys.Button.LEFT_BUMPER)) { //released the button
-            pressed_lb = false;
+        } else if (o_rb && !robot.operOp.getButton(GamepadKeys.Button.RIGHT_BUMPER)) { //released the button
+            o_rb = false;
+        } else if (o_lb && !robot.operOp.getButton(GamepadKeys.Button.LEFT_BUMPER)) { //released the button
+            o_lb = false;
         }
 
         /** DPAD_UP and DPAD_DOWN handles adjusting the tilt offset */
-        if (!pressed_up && robot.operOp.getButton(GamepadKeys.Button.DPAD_UP)) { //tilt offset up
-            pressed_up = true;
+        if (!o_up && robot.operOp.getButton(GamepadKeys.Button.DPAD_UP)) { //tilt offset up
+            o_up = true;
             tiltpid.increaseOffset();
-        } else if (!pressed_dn && robot.operOp.getButton(GamepadKeys.Button.DPAD_DOWN)) { //tilt offset down
-            pressed_dn = true;
+        } else if (!o_dn && robot.operOp.getButton(GamepadKeys.Button.DPAD_DOWN)) { //tilt offset down
+            o_dn = true;
             tiltpid.decreaseOffset();
-        } else if (pressed_up && !robot.operOp.getButton(GamepadKeys.Button.DPAD_UP)) { //released the button
-            pressed_up = false;
-        } else if (pressed_dn && !robot.operOp.getButton(GamepadKeys.Button.DPAD_DOWN)) { //released the button
-            pressed_dn = false;
+        } else if (o_up && !robot.operOp.getButton(GamepadKeys.Button.DPAD_UP)) { //released the button
+            o_up = false;
+        } else if (o_dn && !robot.operOp.getButton(GamepadKeys.Button.DPAD_DOWN)) { //released the button
+            o_dn = false;
         }
 
         /** Left and Right DPAD handles adjusting the elevator offset */
-        if (!pressed_rt && robot.operOp.getButton(GamepadKeys.Button.DPAD_RIGHT)) { //elev offset up
-            pressed_rt = true;
+        if (!o_rt && robot.operOp.getButton(GamepadKeys.Button.DPAD_RIGHT)) { //elev offset up
+            o_rt = true;
             elevpid.increaseOffset();
-        } else if (!pressed_lt && robot.operOp.getButton(GamepadKeys.Button.DPAD_LEFT)) { //elev offset down
-            pressed_lt = true;
+        } else if (!o_lt && robot.operOp.getButton(GamepadKeys.Button.DPAD_LEFT)) { //elev offset down
+            o_lt = true;
             elevpid.decreaseOffset();
-        } else if (pressed_lt && !robot.operOp.getButton(GamepadKeys.Button.DPAD_LEFT)) { //released the button
-            pressed_lt = false;
-        } else if (pressed_rt && !robot.operOp.getButton(GamepadKeys.Button.DPAD_RIGHT)) { //released the button
-            pressed_rt = false;
+        } else if (o_lt && !robot.operOp.getButton(GamepadKeys.Button.DPAD_LEFT)) { //released the button
+            o_lt = false;
+        } else if (o_rt && !robot.operOp.getButton(GamepadKeys.Button.DPAD_RIGHT)) { //released the button
+            o_rt = false;
         }
 
 //        robot.driverOp.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new InstantCommand(() -> {

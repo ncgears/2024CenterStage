@@ -20,8 +20,8 @@ import org.firstinspires.ftc.teamcode.pidcontrollers.pidTurnControllerFtclib;
 import org.firstinspires.ftc.teamcode.processors.tseSaturationProcessor;
 import org.firstinspires.ftc.vision.VisionPortal;
 
-@Autonomous(name="TEST Short Auton", group="JRB")
-@Disabled
+@Autonomous(name="Short Auton", group="JRB")
+//@Disabled
 public class
 autonShortAuton2 extends OpMode {
     boolean m_long_auton = false; //set true if this is the long auton
@@ -39,7 +39,7 @@ autonShortAuton2 extends OpMode {
     double pid_turn_target = 0; //target degrees for pid turn
     boolean pid_driving, pid_turning = false; //tracking if we are using these pid controllers
     pidDriveControllerFtclib drivepid = new pidDriveControllerFtclib(this, pid_drive_target, Constants.Drivetrain.driveController.kP, Constants.Drivetrain.driveController.kI, Constants.Drivetrain.driveController.kD, Constants.Drivetrain.driveController.kF);
-    pidTurnControllerFtclib turnpid = new pidTurnControllerFtclib(this, pid_turn_target, Constants.Drivetrain.turnController.kP, Constants.Drivetrain.turnController.kI, Constants.Drivetrain.turnController.kD, Constants.Drivetrain.turnController.kF);
+    pidTurnControllerFtclib turnpid = new pidTurnControllerFtclib(this, pid_turn_target, Constants.Drivetrain.turnController.kP, Constants.Drivetrain.turnController.kI, Constants.Drivetrain.turnController.kD, Constants.Drivetrain.turnController.kF, Constants.Drivetrain.turnController.kIZone);
     pidTiltController tiltpid = new pidTiltController(this, m_manip_pos.getTilt(), Constants.Manipulator.tiltController.kP, Constants.Manipulator.tiltController.kI, Constants.Manipulator.tiltController.kD, Constants.Manipulator.tiltController.kF);
     pidElevatorController elevpid = new pidElevatorController(this, m_manip_pos.getElevator(), Constants.Manipulator.elevatorController.kP, Constants.Manipulator.elevatorController.kI, Constants.Manipulator.elevatorController.kD, Constants.Manipulator.elevatorController.kF);
 
@@ -117,8 +117,8 @@ autonShortAuton2 extends OpMode {
                     visionPortal.stopStreaming(); //stop streaming once we we know TSE location
                     robot.playAudio(String.format("Prop %s",m_tse.toString()),500);
                 })
-//                .transitionWithPointerState( () -> (m_tse != tseSaturationProcessor.Selected.NONE), States.RESTING) //TODO: Comment this
-                .transition( () -> (m_tse != tseSaturationProcessor.Selected.NONE))
+                .transitionWithPointerState( () -> (m_tse != tseSaturationProcessor.Selected.NONE), States.DRIVE_PIXEL1) //TODO: Comment this
+//                .transition( () -> (m_tse != tseSaturationProcessor.Selected.NONE))
                 .state(States.MANIP_TRANSPORT)
                 .onEnter( () -> {
                     m_manip_pos = Constants.Manipulator.Positions.TRANSPORT;
@@ -128,7 +128,7 @@ autonShortAuton2 extends OpMode {
                 .onEnter( () -> { //actions to perform when entering state
 //                    robot.playAudio("Drive Spike",500);
                     pid_driving = true;
-                    driveInchesPID(30);
+                    driveInchesPID(34);
                 })
                 .onExit( () -> { //actions to perform when exiting state
                     pid_driving = false;
@@ -147,7 +147,7 @@ autonShortAuton2 extends OpMode {
                 .state(States.DRIVE_SPIKE) //create state
                 .onEnter( () -> { //actions to perform when entering state
                     pid_driving = true;
-                    driveInchesPID(-6);
+                    driveInchesPID(-13);
                 })
                 .onExit( () -> { //actions to perform when exiting state
                     pid_driving = false;
@@ -173,8 +173,8 @@ autonShortAuton2 extends OpMode {
                 .onExit( () -> { //actions to perform when exiting state
                     pid_driving = false;
                 })
-//                .transitionWithPointerState( () -> (pid_driving && drivepid.atTarget()), States.RESTING) //TODO: Comment this
-                .transition( () -> (pid_driving && drivepid.atTarget()) )
+                .transitionWithPointerState( () -> (pid_driving && drivepid.atTarget()), States.RESTING) //TODO: Comment this
+//                .transition( () -> (pid_driving && drivepid.atTarget()) )
                 .state(States.DROP_PIXEL2)
                 .onEnter( () -> {
                     if((robot.alliance == Constants.Alliance.BLUE && m_tse == tseSaturationProcessor.Selected.RIGHT)
@@ -189,7 +189,7 @@ autonShortAuton2 extends OpMode {
                 .onEnter( () -> { //actions to perform when entering state
                     robot.playAudio("Drive Pixel 3",500);
                     pid_driving = true;
-                    driveInchesPID(-6);
+                    driveInchesPID(12);
                 })
                 .onExit( () -> { //actions to perform when exiting state
                     pid_driving = false;

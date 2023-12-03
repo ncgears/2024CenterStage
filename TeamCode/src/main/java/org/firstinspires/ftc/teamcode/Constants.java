@@ -13,11 +13,12 @@ public class Constants {
     public static class Drivetrain {
         public static boolean useFieldCentric = true; //try to use FC if gyro has value
         public static class turnController {
-            public static double targetThreshold = 2.0; //how many degrees is close enough
-            public static double kF = 0.15; //0.0 //minimum power to move the robot
-            public static double kP = 0.01;
-            public static double kI = 0.00075;
-            public static double kD = 0.003;
+            public static double targetThreshold = 1.0; //how many degrees is close enough
+            public static double kF = 0.10; //0.0 //minimum power to move the robot
+            public static double kP = 0.04;
+            public static double kI = 0.0; //0.0006;
+            public static double kIZone = 5.0; //I Zone for accumulating error
+            public static double kD = 0.5; //0.004;
             public static class limits {
                 public static double maxOutput = 0.55; //maximum output power
             }
@@ -34,6 +35,7 @@ public class Constants {
             public static double kF = 0.15; //0.0 //minimum power to move the robot
             public static double kP = 0.0005;
             public static double kI = 0.00002;
+            public static double kIZone = 5.0 * ticksPerInch; //I Zone for accumulating error
             public static double kD = 0.003;
             public static class limits {
                 public static double maxOutput = 0.55; //maximum output power
@@ -108,6 +110,7 @@ public class Constants {
             public static double kF = 0.0; //0.0 //minimum power to move the motor
             public static double kP = 0.0015; //0.0015
             public static double kI = 0.0000010; //0.0000015
+            public static double kIZone = 500.0; //I Zone for accumulating error
             public static double kD = 0.002; //0.002
             public static class limits {
                 public static double maxOutput = 0.75; //maximum output power
@@ -128,6 +131,7 @@ public class Constants {
             public static double kF = 0.0; //0.0 //minimum power to move the motor
             public static double kP = 0.0005; //0025
             public static double kI = 0.000004; //000002
+            public static double kIZone = 2.0 * ticksPerInch; //I Zone for accumulating error
             public static double kD = 0.002; //002
             public static class limits {
                 public static double maxOutput = 1.00; //maximum output power

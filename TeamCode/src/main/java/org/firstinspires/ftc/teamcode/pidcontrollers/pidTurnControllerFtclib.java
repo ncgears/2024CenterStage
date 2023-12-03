@@ -3,21 +3,23 @@ package org.firstinspires.ftc.teamcode.pidcontrollers;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.apache.commons.math3.analysis.function.Constant;
 import org.firstinspires.ftc.teamcode.Constants;
 
 public class pidTurnControllerFtclib {
     private double targetAngle;
-    private double kP, kI, kD, kF;
+    private double kP, kI, kD, kF, kIZone;
     private double accumulatedError = 0.0;
     private ElapsedTime timer = new ElapsedTime();
     private double lastError, lastTime = 0.0;
     private OpMode myOpMode = null;
 
-    public pidTurnControllerFtclib(OpMode opmode, double target, double p, double i, double d, double f) {
+    public pidTurnControllerFtclib(OpMode opmode, double target, double p, double i, double d, double f, double iZone) {
         myOpMode = opmode;
         targetAngle = target;
         kP = p;
         kI = i;
+        kIZone = iZone;
         kD = d;
         kF = f;
     }
@@ -30,12 +32,14 @@ public class pidTurnControllerFtclib {
         if (error > 180) error -= 360;
 
         //I - Integral - This accumulates the error over time to correct for not getting to the set point
-        accumulatedError += error;
-        //if we reach the threshold, reset accumulated error to stop adding it
-        if (atTarget(currentAngle)) {
-            accumulatedError = 0;
+        if(Math.abs(error) < kIZone) {
+            accumulatedError += error;
+            //if we reach the threshold, reset accumulated error to stop adding it
+            if (atTarget(currentAngle)) {
+                accumulatedError = 0;
+            }
+            accumulatedError = Math.abs(accumulatedError) * Math.signum(error);
         }
-        accumulatedError = Math.abs(accumulatedError) * Math.signum(error);
 
         //D - Derivative - This slows down the robot when its moving too rapidly
         double slope = 0.0;

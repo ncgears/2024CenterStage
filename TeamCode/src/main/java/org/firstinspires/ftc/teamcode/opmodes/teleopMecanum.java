@@ -30,9 +30,9 @@ public class teleopMecanum extends OpMode {
     double drive_fwd, drive_strafe, drive_turn = 0.0; //used for holding requested drive values
     double pid_turn_target = 0; //target degrees for pid turn
     boolean pid_turning = false; //tracking if we are using these pid controllers
-    pidTurnControllerFtclib turnpid = new pidTurnControllerFtclib(this, pid_turn_target, Constants.Drivetrain.turnController.kP, Constants.Drivetrain.turnController.kI, Constants.Drivetrain.turnController.kD, Constants.Drivetrain.turnController.kF);
-    pidTiltController tiltpid = new pidTiltController(this, m_manip_pos.getTilt(), Constants.Manipulator.tiltController.kP, Constants.Manipulator.tiltController.kI, Constants.Manipulator.tiltController.kD, Constants.Manipulator.tiltController.kF);
-    pidElevatorController elevpid = new pidElevatorController(this, m_manip_pos.getElevator(), Constants.Manipulator.elevatorController.kP, Constants.Manipulator.elevatorController.kI, Constants.Manipulator.elevatorController.kD, Constants.Manipulator.elevatorController.kF);
+    pidTurnControllerFtclib turnpid = new pidTurnControllerFtclib(this, pid_turn_target, Constants.Drivetrain.turnController.kP, Constants.Drivetrain.turnController.kI, Constants.Drivetrain.turnController.kD, Constants.Drivetrain.turnController.kF, Constants.Drivetrain.turnController.kIZone);
+    pidTiltController tiltpid = new pidTiltController(this, m_manip_pos.getTilt(), Constants.Manipulator.tiltController.kP, Constants.Manipulator.tiltController.kI, Constants.Manipulator.tiltController.kD, Constants.Manipulator.tiltController.kF, Constants.Manipulator.tiltController.kIZone);
+    pidElevatorController elevpid = new pidElevatorController(this, m_manip_pos.getElevator(), Constants.Manipulator.elevatorController.kP, Constants.Manipulator.elevatorController.kI, Constants.Manipulator.elevatorController.kD, Constants.Manipulator.elevatorController.kF, Constants.Manipulator.elevatorController.kIZone);
     boolean tilt_low_limit = false;
 
     boolean d_a, d_b, d_x, d_y, d_lb = false; //for debouncing driver button presses
@@ -69,6 +69,7 @@ public class teleopMecanum extends OpMode {
     public void start() {
         runtime.reset();
         m_turn_multiplier = (robot.alliance == Constants.Alliance.RED) ? -1.0 : 1.0;
+        robot.setPixelPosition(Constants.PixelDropper.Positions.UP);
     }
 
     @Override
@@ -84,12 +85,12 @@ public class teleopMecanum extends OpMode {
         if (pid_turning) { //set new values for joysticks if we requested pid turning
             // update the pid controller
             turnpid.setTarget(pid_turn_target);
-            if (turnpid.atTarget(robot.getRobotYaw())) {
-                drive_turn = 0.0;
-                pid_turning = false;
-            } else {
+//            if (turnpid.atTarget(robot.getRobotYaw())) {
+//                drive_turn = 0.0;
+//                pid_turning = false;
+//            } else {
                 drive_turn = -turnpid.update(robot.getRobotYaw());
-            }
+//            }
         }
         // perform the drive
         if (robot.getRobotYaw() == 0.0 || !robot.fieldCentric) { //exactly 0 from the imu is unlikely, fall back to robot centric

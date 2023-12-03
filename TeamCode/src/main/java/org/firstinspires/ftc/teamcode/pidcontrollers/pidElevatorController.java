@@ -7,18 +7,19 @@ import org.firstinspires.ftc.teamcode.Constants;
 
 public class pidElevatorController {
     private double targetTicks;
-    private double kP, kI, kD, kF;
+    private double kP, kI, kD, kF, kIZone;
     private double accumulatedError = 0.0;
     private ElapsedTime timer = new ElapsedTime();
     private double lastError, lastTime = 0.0;
     private OpMode myOpMode = null;
     private double offset = 0.0;
 
-    public pidElevatorController(OpMode opmode, double target, double p, double i, double d, double f) {
+    public pidElevatorController(OpMode opmode, double target, double p, double i, double d, double f, double iZone) {
         myOpMode = opmode;
         targetTicks = target;
         kP = p;
         kI = i;
+        kIZone = iZone;
         kD = d;
         kF = f;
     }
@@ -35,13 +36,14 @@ public class pidElevatorController {
 //        RobotLog.d(String.format("drive error = %.2f", error));
 //        myOpMode.telemetry.update();
         //I - Integral - This accumulates the error over time to correct for not getting to the set point
-        accumulatedError += error;
-        //if we reach the threshold, reset accumulated error to stop adding it
-        if (atTarget(error)) {
-            accumulatedError = 0;
+        if(Math.abs(error) < kIZone) {
+            accumulatedError += error;
+            //if we reach the threshold, reset accumulated error to stop adding it
+            if (atTarget(error)) {
+                accumulatedError = 0;
+            }
+            accumulatedError = accumulatedError + (error * (timer.milliseconds() - lastTime));
         }
-//        accumulatedError = Math.abs(accumulatedError) * Math.signum(error);
-        accumulatedError = accumulatedError + (error * (timer.milliseconds() - lastTime));
 
         //D - Derivative - This slows down the robot when its moving too rapidly
         double slope = 0.0;

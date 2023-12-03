@@ -7,18 +7,19 @@ import org.firstinspires.ftc.teamcode.Constants;
 
 public class pidTiltController {
     private double targetTicks;
-    private double kP, kI, kD, kF;
+    private double kP, kI, kD, kF, kIZone;
     private double accumulatedError = 0.0;
     private ElapsedTime timer = new ElapsedTime();
     private double lastError, lastTime = 0.0;
     private OpMode myOpMode = null;
     private double offset = 0.0;
 
-    public pidTiltController(OpMode opmode, double target, double p, double i, double d, double f) {
+    public pidTiltController(OpMode opmode, double target, double p, double i, double d, double f, double iZone) {
         myOpMode = opmode;
         targetTicks = target;
         kP = p;
         kI = i;
+        kIZone = iZone;
         kD = d;
         kF = f;
     }
@@ -32,10 +33,12 @@ public class pidTiltController {
         //P - Proportional - This determines the error that we will multiply by our constant to set power
         double error = targetTicks - currentTicks;
         //I - Integral - This accumulates the error over time to correct for not getting to the set point
-        accumulatedError += error;
-        accumulatedError = accumulatedError + (error * (timer.milliseconds() - lastTime));
-        if (atTarget(error)) { //if we reach the threshold, reset accumulated error to stop adding it
-            accumulatedError = 0;
+        if(Math.abs(error) < kIZone) {
+            accumulatedError += error;
+            accumulatedError = accumulatedError + (error * (timer.milliseconds() - lastTime));
+            if (atTarget(error)) { //if we reach the threshold, reset accumulated error to stop adding it
+                accumulatedError = 0;
+            }
         }
 
         //D - Deriviative - This slows down the robot when its moving too rapidly

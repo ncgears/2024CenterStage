@@ -83,6 +83,7 @@ public class hwMecanumFtclib {
     // Alliance Flag related stuff
     public DigitalChannel m_flag_a, m_flag_b = null;
     public Alliance alliance = Alliance.NONE;
+    public boolean fieldCentric = true;
 
     // Manipulator related stuff
     public Motor m_tilt_motor, m_elev_motor = null;
@@ -129,6 +130,8 @@ public class hwMecanumFtclib {
         m_motor_rr = new Motor(hwMap, "rr drive");
         Motor[] m_motors = {m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr};
         drive = new MecanumDrive(false, m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr); //do not invert right, we handle this later to fix encoders too
+        fieldCentric = Constants.Drivetrain.useFieldCentric;
+
         // Gamepads
         driverOp = new GamepadEx(myOpMode.gamepad1);
         operOp = new GamepadEx(myOpMode.gamepad2);
@@ -264,14 +267,7 @@ public class hwMecanumFtclib {
         double left = (frontOnly) ? fl : Math.min(Math.abs(fl),Math.abs(rl)) * Math.signum(fl);
         //average
         int avg = (int) ((right + left) / 2);
-
-//        myOpMode.telemetry.addData("fl enc", "%d", fl);
-//        myOpMode.telemetry.addData("fr enc", "%d", fr);
-//        myOpMode.telemetry.addData("rl enc", "%d", rl);
-//        myOpMode.telemetry.addData("rr enc", "%d", rr);
-        myOpMode.telemetry.addData("drive enc", "fl=%d, rl=%d, fr=%d, rr=%d, avg=%d", fl, rl, fr, rr, avg);
-//        myOpMode.telemetry.update();
-
+//        myOpMode.telemetry.addData("drive enc", "fl=%d, rl=%d, fr=%d, rr=%d, avg=%d", fl, rl, fr, rr, avg);
         return avg;
     }
 

@@ -35,9 +35,8 @@ public class teleopMecanum extends OpMode {
     pidElevatorController elevpid = new pidElevatorController(this, m_manip_pos.getElevator(), Constants.Manipulator.elevatorController.kP, Constants.Manipulator.elevatorController.kI, Constants.Manipulator.elevatorController.kD, Constants.Manipulator.elevatorController.kF);
     boolean tilt_low_limit = false;
 
-
+    boolean d_a, d_b, d_x, d_y, d_lb = false; //for debouncing driver button presses
     boolean o_rb, o_lb, o_up, o_dn, o_lt, o_rt = false; //for debouncing operator button presses
-    boolean d_a, d_b, d_x, d_y = false; //for debouncing driver button presses
 
     @Override
     public void init() {
@@ -93,7 +92,7 @@ public class teleopMecanum extends OpMode {
             }
         }
         // perform the drive
-        if (robot.getRobotYaw() == 0.0 || !Constants.Drivetrain.useFieldCentric) { //exactly 0 from the imu is unlikely, fall back to robot centric
+        if (robot.getRobotYaw() == 0.0 || !robot.fieldCentric) { //exactly 0 from the imu is unlikely, fall back to robot centric
             robot.drive.driveRobotCentric(drive_strafe, drive_fwd, drive_turn);
         } else {
             robot.drive.driveFieldCentric(drive_strafe, drive_fwd, drive_turn, robot.getRobotYaw());
@@ -141,6 +140,13 @@ public class teleopMecanum extends OpMode {
         } else if (d_x && !robot.driverOp.getButton(GamepadKeys.Button.X)) { //released the button
             d_x = false;
         }
+
+        // toggle field centric drive
+        if (!d_lb && robot.driverOp.getButton(GamepadKeys.Button.LEFT_BUMPER)) {
+            d_lb = true;
+            robot.fieldCentric = !robot.fieldCentric;
+        }
+        else if (d_lb && !robot.driverOp.getButton(GamepadKeys.Button.LEFT_BUMPER)) { d_lb = false; }
 
         // automated field-relative turn functions for d-pad
         if (robot.driverOp.getButton(GamepadKeys.Button.DPAD_LEFT) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_DOWN) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_UP)) {
@@ -351,6 +357,7 @@ public class teleopMecanum extends OpMode {
     private void telem(boolean idle) {
         telemetry.addData("Alliance", robot.alliance.toString());
         telemetry.addData("Last Command", m_last_command.toString());
+        telemetry.addData("Robot Drive", "%s Centric", (robot.fieldCentric) ? "Field" : "Robot");
         telemetry.addData("Robot Heading", "%.2f", robot.getRobotYaw());
         telemetry.addData("Obstacle Distance", "%.2f Inches", robot.getDistance());
         telemetry.addData("Pixel Dropper", robot.getPixelPosition().toString());

@@ -97,6 +97,7 @@ public class hwMecanumFtclib {
 
     // Distance sensor
     public SensorRevTOFDistance m_distance = null;
+    public boolean ignoreDistance = false;
 
     // Audio Telemetry
     public boolean isSpeaking = false;
@@ -131,6 +132,7 @@ public class hwMecanumFtclib {
         Motor[] m_motors = {m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr};
         drive = new MecanumDrive(false, m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr); //do not invert right, we handle this later to fix encoders too
         fieldCentric = Constants.Drivetrain.useFieldCentric;
+        ignoreDistance = false;
 
         // Gamepads
         driverOp = new GamepadEx(myOpMode.gamepad1);
@@ -305,10 +307,12 @@ public class hwMecanumFtclib {
     public void setTiltPower(double power) {
         if(power < 0 && getTiltLowLimit()) {
             myOpMode.telemetry.addLine("ERROR: Tilt is at low limit");
+//            playAudio("Tilt Low Limit", 500);
             power = 0;
         }
         if(power > 0 && getTiltHighLimit()) {
             myOpMode.telemetry.addLine("ERROR: Tilt is at high limit");
+//            playAudio("Tilt High Limit", 500);
             power = 0;
         }
         m_tilt_motor.set(power);

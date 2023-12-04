@@ -4,7 +4,6 @@ import android.util.Size;
 
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.sfdev.assembly.state.StateMachine;
@@ -20,10 +19,10 @@ import org.firstinspires.ftc.teamcode.pidcontrollers.pidTurnControllerFtclib;
 import org.firstinspires.ftc.teamcode.processors.tseSaturationProcessor;
 import org.firstinspires.ftc.vision.VisionPortal;
 
-@Autonomous(name="Short Auton", group="JRB")
-@Disabled
+@Autonomous(name="TEST Short Auton 2", group="JRB")
+//@Disabled
 public class
-autonShortAuton2 extends OpMode {
+autonShortAuton3 extends OpMode {
     boolean m_long_auton = false; //set true if this is the long auton
     hwMecanumFtclib robot = new hwMecanumFtclib(this);
     ElapsedTime runtime = new ElapsedTime();
@@ -46,6 +45,7 @@ autonShortAuton2 extends OpMode {
     private tseSaturationProcessor visionProcessor;
     private VisionPortal visionPortal;
     boolean searchTSE = false;
+    boolean strafing = false;
     tseSaturationProcessor.Selected m_tse = tseSaturationProcessor.Selected.NONE;
 
     boolean isDone_pixel1, isDone_pixel2, isDone_pixel3 = false;
@@ -58,15 +58,21 @@ autonShortAuton2 extends OpMode {
         DRIVE_PIXEL1, //Drive to the MIDDLE pixel
         DROP_PIXEL1, //Drop the MIDDLE pixel (conditionally)
         DRIVE_SPIKE, //Drive to the center of the spike
+        DECIDE_PIXEL1,
+        TURN_PIXEL1,
+        DRIVE_SPIKE2,
         TURN_GOAL, //Turn toward Backstage (alliance specific)
+        DECIDE_PIXEL2,
         DRIVE_PIXEL2, //Backward to the 2nd Pixel
         DROP_PIXEL2, //Drop the RIGHT pixel (conditionally)
         DRIVE_PIXEL3, //Forward to the 3rd Pixel
         DROP_PIXEL3, //Drop the LEFT pixel (conditionally)
+        TURN_GOAL2,
         DRIVE_MIDPOINT, //Drive to the midpoint
         MANIP_SCORE, //Manipulator to SCORE_AUTON position
         DRIVE_GOAL, //Drive to the backstage
         MANIP_DROP, //Manipulator to SCORE_AUTONDROP position
+        CLEAR_GOAL,
         STRAFE_CLEAR, //Clear the backstage by moving left/right (alliance specific)
         RESTING //Doing nothing
     }
@@ -75,9 +81,6 @@ autonShortAuton2 extends OpMode {
     @Override
     public void init() {
         robot.init(hardwareMap);
-
-//        robot.setMotorInverted(false,true,true,false); //Not sure why its wrong only for auton.. This is a workaround.
-
         visionProcessor = new tseSaturationProcessor();
         try {
 //            visionPortal = VisionPortal.easyCreateWithDefaults(hardwareMap.get(WebcamName.class, "Webcam 1"), visionProcessor);
@@ -98,9 +101,9 @@ autonShortAuton2 extends OpMode {
                 })
                 .onExit( () -> {
                     m_turn_multiplier = (robot.alliance == Constants.Alliance.RED) ? -1.0 : 1.0; //If red alliance, turns are reversed
-                    robot.playAudio(String.format("Alliance %s", robot.alliance.toString()),500);
+                    robot.playAudio(String.format("%s", robot.alliance.toString()),500);
                 })
-//                .transitionWithPointerState( () -> (robot.alliance != Constants.Alliance.NONE), States.FIND_TSE) //TODO: Comment this
+//                .transitionWithPointerState( () -> (robot.alliance != Constants.Alliance.NONE), States.STRAFE_CLEAR) //TODO: Comment this
                 .transition( () -> (robot.alliance != Constants.Alliance.NONE))
                 .state(States.FIND_TSE) //Finds the team supplied element
                 .onEnter( () -> {
@@ -115,20 +118,46 @@ autonShortAuton2 extends OpMode {
                 .onExit( () -> {
                     searchTSE = false;
                     visionPortal.stopStreaming(); //stop streaming once we we know TSE location
-                    robot.playAudio(String.format("Prop %s",m_tse.toString()),500);
+                    robot.playAudio(String.format("%s",m_tse.toString()),500);
                 })
-                .transitionWithPointerState( () -> (m_tse != tseSaturationProcessor.Selected.NONE), States.DRIVE_PIXEL1) //TODO: Comment this
-//                .transition( () -> (m_tse != tseSaturationProcessor.Selected.NONE))
+//                .transitionWithPointerState( () -> (m_tse != tseSaturationProcessor.Selected.NONE), States.DRIVE_SPIKE) //TODO: Comment this
+                .transition( () -> (m_tse != tseSaturationProcessor.Selected.NONE))
                 .state(States.MANIP_TRANSPORT)
                 .onEnter( () -> {
                     m_manip_pos = Constants.Manipulator.Positions.TRANSPORT;
                 })
                 .transition(() -> (true))
+                .state(States.DRIVE_SPIKE) //create state
+                .onEnter( () -> { //actions to perform when entering state
+                    elapsed.reset();
+                    double distance = (m_tse != tseSaturationProcessor.Selected.MIDDLE) ? 25 : 22;
+                    driveInchesPID(distance);
+                })
+                .onExit( () -> { //actions to perform when exiting state
+                    pid_driving = false;
+                })
+//                .transitionWithPointerState( () -> ((pid_driving && drivepid.atTarget()) && m_tse != tseSaturationProcessor.Selected.MIDDLE), States.TURN_GOAL)
+                .transition( () -> (pid_driving && drivepid.atTarget()) )
+                .state(States.DECIDE_PIXEL1)
+                .transitionWithPointerState( () -> (m_tse != tseSaturationProcessor.Selected.MIDDLE), States.TURN_GOAL)
+                .transition( () -> (true) )
+                .state(States.TURN_PIXEL1) //create state
+                .onEnter( () -> { //actions to perform when entering state
+                    elapsed.reset();
+                    robot.playAudio("Turn pixel 1",500);
+                    turnToPID((180 * m_turn_multiplier));
+                })
+                .onExit( () -> { //actions to perform when exiting state
+                    pid_turning = false;
+                })
+//                .transitionWithPointerState( () -> (pid_turning && turnpid.atTarget(robot.getRobotYaw())), States.RESTING) //TODO: Comment this
+                .transition( () -> (elapsed.seconds() >= 3.0 && pid_turning && turnpid.atTarget(robot.getRobotYaw())) )
+                .transitionTimed(4.0)
                 .state(States.DRIVE_PIXEL1) //create state
                 .onEnter( () -> { //actions to perform when entering state
 //                    robot.playAudio("Drive Spike",500);
-                    pid_driving = true;
-                    driveInchesPID(34);
+                    elapsed.reset();
+                    driveInchesPID(-8);
                 })
                 .onExit( () -> { //actions to perform when exiting state
                     pid_driving = false;
@@ -143,38 +172,44 @@ autonShortAuton2 extends OpMode {
                     } else isDone_pixel1 = true;
                 })
                 .transition( () -> (isDone_pixel1))
-                .transitionTimed(0.5)
-                .state(States.DRIVE_SPIKE) //create state
+                .transitionTimed(0.3)
+                .state(States.DRIVE_SPIKE2) //create state
                 .onEnter( () -> { //actions to perform when entering state
-                    pid_driving = true;
-                    driveInchesPID(-13);
+//                    robot.playAudio("Drive Spike",500);
+                    elapsed.reset();
+                    driveInchesPID(3.75);
                 })
                 .onExit( () -> { //actions to perform when exiting state
                     pid_driving = false;
                 })
+//                .transitionWithPointerState( () -> (pid_driving && drivepid.atTarget()), States.RESTING) //TODO: Comment this
                 .transition( () -> (pid_driving && drivepid.atTarget()) )
                 .state(States.TURN_GOAL) //create state
                 .onEnter( () -> { //actions to perform when entering state
+                    elapsed.reset();
                     robot.playAudio("Turn backstage",500);
-                    pid_turning = true;
                     turnToPID((90 * m_turn_multiplier));
                 })
                 .onExit( () -> { //actions to perform when exiting state
                     pid_turning = false;
                 })
 //                .transitionWithPointerState( () -> (pid_turning && turnpid.atTarget(robot.getRobotYaw())), States.RESTING) //TODO: Comment this
-                .transition( () -> (pid_turning && turnpid.atTarget(robot.getRobotYaw())) )
+                .transition( () -> (elapsed.seconds() >= 2.5 && pid_turning && turnpid.atTarget(robot.getRobotYaw())) )
+                .transitionTimed(3.0)
+                .state(States.DECIDE_PIXEL2)
+                .transitionWithPointerState( () -> ((robot.alliance == Constants.Alliance.RED && m_tse == tseSaturationProcessor.Selected.LEFT) || (robot.alliance == Constants.Alliance.BLUE && m_tse == tseSaturationProcessor.Selected.RIGHT)), States.DRIVE_PIXEL2)
+                .transitionWithPointerState( () -> (true), States.DRIVE_PIXEL3)
                 .state(States.DRIVE_PIXEL2) //create state
                 .onEnter( () -> { //actions to perform when entering state
+                    elapsed.reset();
                     robot.playAudio("Drive Pixel 2",500);
-                    pid_driving = true;
-                    driveInchesPID(-6);
+                    driveInchesPID(-8);
                 })
                 .onExit( () -> { //actions to perform when exiting state
                     pid_driving = false;
                 })
-                .transitionWithPointerState( () -> (pid_driving && drivepid.atTarget()), States.RESTING) //TODO: Comment this
-//                .transition( () -> (pid_driving && drivepid.atTarget()) )
+//                .transitionWithPointerState( () -> (pid_driving && drivepid.atTarget()), States.RESTING) //TODO: Comment this
+                .transition( () -> (pid_driving && drivepid.atTarget()) )
                 .state(States.DROP_PIXEL2)
                 .onEnter( () -> {
                     if((robot.alliance == Constants.Alliance.BLUE && m_tse == tseSaturationProcessor.Selected.RIGHT)
@@ -184,12 +219,17 @@ autonShortAuton2 extends OpMode {
                     } else isDone_pixel2 = true;
                 })
                 .transition( () -> (isDone_pixel2))
-                .transitionTimed(0.5)
+                .transitionTimed(0.3)
                 .state(States.DRIVE_PIXEL3) //create state
                 .onEnter( () -> { //actions to perform when entering state
                     robot.playAudio("Drive Pixel 3",500);
-                    pid_driving = true;
-                    driveInchesPID(12);
+                    elapsed.reset();
+                    if((robot.alliance == Constants.Alliance.BLUE && m_tse == tseSaturationProcessor.Selected.RIGHT)
+                    || (robot.alliance == Constants.Alliance.RED && m_tse == tseSaturationProcessor.Selected.LEFT)) {
+                        driveInchesPID(15);
+                    } else {
+                        driveInchesPID(10);
+                    }
                 })
                 .onExit( () -> { //actions to perform when exiting state
                     pid_driving = false;
@@ -203,16 +243,15 @@ autonShortAuton2 extends OpMode {
                             || (robot.alliance == Constants.Alliance.RED && m_tse == tseSaturationProcessor.Selected.RIGHT)) {
                         robot.playAudio("Drop Pixel", 500);
                         robot.setPixelPosition(Constants.PixelDropper.Positions.UP);
-                    }
-                    isDone_pixel3 = true;
+                    } else isDone_pixel2 = true;
                 })
-                .transition( () -> (isDone_pixel3 && elapsed.seconds() > 0.5))
-                .transitionTimed(0.5)
+                .transition( () -> (isDone_pixel3))
+                .transitionTimed(0.3)
                 .state(States.DRIVE_MIDPOINT) //create state
                 .onEnter( () -> { //actions to perform when entering state
                     robot.playAudio("Drive midpoint",500);
-                    pid_driving = true;
-                    double distance = 5;
+                    elapsed.reset();
+                    double distance = 8;
                     distance += (m_long_auton) ? 48 : 0; //if a long auton, add another 48 inches here
                     driveInchesPID(distance); //drive past the bars
                 })
@@ -220,6 +259,17 @@ autonShortAuton2 extends OpMode {
                     pid_driving = false;
                 })
                 .transition( () -> (pid_driving && drivepid.atTarget()) )
+                .state(States.TURN_GOAL2) //create state
+                .onEnter( () -> { //actions to perform when entering state
+                    elapsed.reset();
+                    robot.playAudio("Turn backstage",500);
+                    turnToPID((90 * m_turn_multiplier));
+                })
+                .onExit( () -> { //actions to perform when exiting state
+                    pid_turning = false;
+                })
+                .transition( () -> (elapsed.seconds() >= 1.5 && pid_turning && turnpid.atTarget(robot.getRobotYaw())) )
+                .transitionTimed(2.0)
                 .state(States.MANIP_SCORE)
                 .onEnter( () -> {
                     m_manip_pos = Constants.Manipulator.Positions.SCORE_AUTO;
@@ -228,13 +278,13 @@ autonShortAuton2 extends OpMode {
                 .state(States.DRIVE_GOAL) //create state
                 .onEnter( () -> { //actions to perform when entering state
                     robot.playAudio("Drive to backstage",500);
-                    pid_driving = true;
-                    driveInchesPID(3); //drive to the goal
+                    elapsed.reset();
+                    driveInchesPID(6); //drive to the goal
                 })
                 .onExit( () -> { //actions to perform when exiting state
                     pid_driving = false;
                 })
-                .transition( () -> (pid_driving && drivepid.atTarget()) )
+                .transition( () -> (robot.getDistance() <= 6.0 || pid_driving && drivepid.atTarget()) )
                 .state(States.MANIP_DROP)
                 .onEnter( () -> {
                     robot.playAudio("Score Pixels",500);
@@ -244,17 +294,30 @@ autonShortAuton2 extends OpMode {
                     m_manip_pos = Constants.Manipulator.Positions.SCORE_AUTO;
                 })
                 .transitionTimed(1.5)
+                .state(States.CLEAR_GOAL) //create state
+                .onEnter( () -> { //actions to perform when entering state
+                    elapsed.reset();
+                    robot.playAudio("Get out the way",500);
+                    driveInchesPID(-6); //drive to the goal
+                })
+                .onExit( () -> { //actions to perform when exiting state
+                    pid_driving = false;
+                })
+                .transitionWithPointerState( () -> (m_long_auton), States.RESTING)
+                .transition( () -> (pid_driving && drivepid.atTarget()) )
                 .state(States.STRAFE_CLEAR)
                 .onEnter( () -> {
-                    robot.playAudio("Get out the way",500);
-                    //STRAFE sideways to clear the board
-                    autonDrive(0, Constants.Auton.autonDriveSpeed * m_turn_multiplier, 0, robot.getRobotYaw());
+                    strafing = true;
                 })
-                .transitionTimed(2.5)
+                .onExit( () -> {
+                    strafing = false;
+                })
+                .transitionTimed(1.5)
                 .state(States.RESTING) //create state
                 .onEnter( () -> { //actions to perform when entering state
                     pid_driving = false;
                     pid_turning = false;
+                    strafing = false;
                     robot.playAudio("Resting",500);
                 })
                 .build();
@@ -291,16 +354,16 @@ autonShortAuton2 extends OpMode {
         // Monitor for TSE
         if(searchTSE) m_tse = visionProcessor.getSelection();
 
-        // Monitor for buttons
-        if(robot.driverOp.getButton(GamepadKeys.Button.BACK)) runCommand(Constants.Commands.GYRO_RESET);
-
         // PID Driving
         drivepid.setTarget(pid_drive_target);
         turnpid.setTarget(pid_turn_target);
         drive_fwd = (pid_driving) ? drivepid.update(robot.getDriveAvgPosition()) : 0.0;
-        drive_strafe = 0.0;
+        drive_strafe = (strafing) ? -Constants.Auton.autonStrafeSpeed * m_turn_multiplier : 0.0;
         drive_turn = (pid_turning) ? -turnpid.update(robot.getRobotYaw()) : 0.0;
-        autonDrive(drive_fwd, 0, drive_turn, robot.getRobotYaw());
+        autonDrive(drive_fwd, drive_strafe, drive_turn, robot.getRobotYaw());
+
+//        if (pid_turning && turnpid.atTarget(robot.getRobotYaw())) pid_turning = false;
+//        if (pid_driving && drivepid.atTarget()) pid_driving = false;
 
         if(m_last_command != Constants.Commands.NONE && runtime.seconds() - m_last_command_time > 2) { //reset the last command after 2 seconds
             runCommand(Constants.Commands.NONE);
@@ -320,19 +383,13 @@ autonShortAuton2 extends OpMode {
         runCommand(Constants.Commands.ROBOT_RESET);
     }
 
-    public void teleopDrive() {
-        robot.drive.driveFieldCentric(
-                robot.driverOp.getLeftX(),
-                robot.driverOp.getLeftY(),
-                robot.driverOp.getRightX(),
-                robot.getRobotYaw()
-        );
-    }
-
     public void autonDrive(double fwd, double strafe, double turn, double headingDegrees) {
 //        robot.drive.driveFieldCentric(strafe,fwd,turn,headingDegrees);
         robot.drive.driveRobotCentric(strafe,fwd,turn);
     }
+
+    public boolean isPidDriving() { return pid_driving; }
+    public boolean isPidTurning() { return pid_turning; }
 
     public void runCommand(Constants.Commands command) {
         m_last_command = command;
@@ -367,6 +424,7 @@ autonShortAuton2 extends OpMode {
     }
 
     public void driveInchesPID(double targetInches) {
+        pid_driving = true;
         robot.resetAllDriveEncoder();
         pid_drive_target = targetInches * Constants.Drivetrain.driveController.ticksPerInch + robot.getDriveAvgPosition();
     }

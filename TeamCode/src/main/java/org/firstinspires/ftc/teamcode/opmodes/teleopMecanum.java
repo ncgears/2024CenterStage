@@ -77,20 +77,20 @@ public class teleopMecanum extends OpMode {
 //        drive_fwd = (pid_turning) ? 0.0 : robot.driverOp.getLeftY(); //if pid turning, no throttle
 //        drive_strafe = (pid_turning) ? 0.0 : robot.driverOp.getLeftX(); //if pid turning, no strafing
 //        drive_turn = (pid_turning) ? turnpid.update(robot.getRobotYaw()) : 0.0;
-        drive_fwd = robot.driverOp.getLeftY();
-        drive_strafe = robot.driverOp.getLeftX();
+        drive_fwd = distanceCorrectedPower(robot.driverOp.getLeftY());
+        drive_strafe = distanceCorrectedPower(robot.driverOp.getLeftX());
         drive_turn = robot.driverOp.getRightX();
         if (Math.abs(drive_turn) > 0.1)
             pid_turning = false; //if we attempted to turn manually, disable pid turning
         if (pid_turning) { //set new values for joysticks if we requested pid turning
             // update the pid controller
             turnpid.setTarget(pid_turn_target);
-//            if (turnpid.atTarget(robot.getRobotYaw())) {
-//                drive_turn = 0.0;
-//                pid_turning = false;
-//            } else {
+            if (turnpid.atTarget(robot.getRobotYaw())) {
+                drive_turn = 0.0;
+                pid_turning = false;
+            } else {
                 drive_turn = -turnpid.update(robot.getRobotYaw());
-//            }
+            }
         }
         // perform the drive
         if (robot.getRobotYaw() == 0.0 || !robot.fieldCentric) { //exactly 0 from the imu is unlikely, fall back to robot centric
@@ -146,6 +146,7 @@ public class teleopMecanum extends OpMode {
         if (!d_lb && robot.driverOp.getButton(GamepadKeys.Button.LEFT_BUMPER)) {
             d_lb = true;
             robot.fieldCentric = !robot.fieldCentric;
+            robot.playAudio((robot.fieldCentric) ? "Field Centric" : "Robot Centric", 500);
         }
         else if (d_lb && !robot.driverOp.getButton(GamepadKeys.Button.LEFT_BUMPER)) { d_lb = false; }
 
@@ -203,13 +204,16 @@ public class teleopMecanum extends OpMode {
                 default:
             }
         } else if (!o_rb && robot.operOp.getButton(GamepadKeys.Button.RIGHT_BUMPER)) { //position up
+            o_rb = true;
             switch (m_manip_pos) {
                 case SCORE_ROW1:
                     m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW2;
+                    m_last_manip_pos = m_manip_pos;
                     telemCommand("SCORING POSITION 2");
                     break;
                 case SCORE_ROW2:
                     m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW3;
+                    m_last_manip_pos = m_manip_pos;
                     telemCommand("SCORING POSITION 3");
                     break;
                 case SCORE_ROW3:
@@ -219,13 +223,16 @@ public class teleopMecanum extends OpMode {
 //                        telemCommand("NOTHING");
             }
         } else if (!o_lb && robot.operOp.getButton(GamepadKeys.Button.LEFT_BUMPER)) { //position down
+            o_lb = true;
             switch (m_manip_pos) {
                 case SCORE_ROW3:
                     m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW2;
+                    m_last_manip_pos = m_manip_pos;
                     telemCommand("SCORING POSITION 2");
                     break;
                 case SCORE_ROW2:
                     m_manip_pos = Constants.Manipulator.Positions.SCORE_ROW1;
+                    m_last_manip_pos = m_manip_pos;
                     telemCommand("SCORING POSITION 1");
                     break;
                 case SCORE_ROW1:
@@ -347,6 +354,20 @@ public class teleopMecanum extends OpMode {
             }
             robot.setTiltPower(power);
         }
+    }
+
+    public double distanceCorrectedPower(double power) {
+        if (robot.ignoreDistance || !Constants.Drivetrain.woahNelly.enabled) return power;
+        double yaw = robot.getRobotYaw();
+        if (yaw >= ((Constants.Drivetrain.woahNelly.direction - Constants.Drivetrain.woahNelly.directionThreshold) * m_turn_multiplier)
+        && yaw <= ((Constants.Drivetrain.woahNelly.direction + Constants.Drivetrain.woahNelly.directionThreshold) * m_turn_multiplier)) {
+            if (robot.getDistance() <= Constants.Drivetrain.woahNelly.distance) {
+                telemetry.addData("Speeding", "WOAH NELLY!");
+                power *= Constants.Drivetrain.woahNelly.multiplier;
+            }
+        }
+//        if (robot.getDistance() <= Constants.Drivetrain.woahNelly) return power * Constants.Drivetrain.woahNellyMultiplier;
+        return power;
     }
 
     public void moveElevator() {

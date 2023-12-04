@@ -48,7 +48,7 @@ public class pidTurnControllerFtclib {
         }
         lastTime = timer.milliseconds();
         lastError = error;
-
+//      myOpMode.telemetry.addData("slope","%.2f", slope);
         //Motor Power calculation
         double motorPower = kF * Math.signum(error) + (1.0 - kF) * Math.tanh(
                 (kP * error) + (kI * accumulatedError) + (kD * slope)

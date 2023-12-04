@@ -9,16 +9,24 @@ public class Constants {
     }
     public static class Auton {
         public static double autonDriveSpeed = 0.5;
+        public static double autonStrafeSpeed = 0.6;
     }
     public static class Drivetrain {
         public static boolean useFieldCentric = true; //try to use FC if gyro has value
+        public static class woahNelly {
+            public static boolean enabled = false; // use woahNelly system to slow down at backstage
+            public static double distance = 10.0;//Inches from obstacle to adjust throttle when aimed at backstage
+            public static double multiplier = 0.4;//Speed reduction
+            public static double direction = 90; //direction for woahNelly
+            public static double directionThreshold = 10.0; //degrees within direction for throttling
+        }
         public static class turnController {
             public static double targetThreshold = 1.0; //how many degrees is close enough
-            public static double kF = 0.10; //0.0 //minimum power to move the robot
-            public static double kP = 0.04;
-            public static double kI = 0.0; //0.0006;
+            public static double kF = 0.00; //0.0 //minimum power to move the robot
+            public static double kP = 0.055; //0.04
+            public static double kI = 0.00011; //0.0006;
             public static double kIZone = 5.0; //I Zone for accumulating error
-            public static double kD = 0.5; //0.004;
+            public static double kD = 0.45; //0.004;
             public static class limits {
                 public static double maxOutput = 0.55; //maximum output power
             }
@@ -129,7 +137,7 @@ public class Constants {
             public static double targetThreshold = 0.2; //how many inches is close enough
             public static double targetThresholdTicks = 50; //targetThreshold * ticksPerInch;
             public static double kF = 0.0; //0.0 //minimum power to move the motor
-            public static double kP = 0.0005; //0025
+            public static double kP = 0.0010; //0025
             public static double kI = 0.000004; //000002
             public static double kIZone = 2.0 * ticksPerInch; //I Zone for accumulating error
             public static double kD = 0.002; //002

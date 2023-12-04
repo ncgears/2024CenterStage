@@ -6,6 +6,8 @@ public class Constants {
     public enum Alliance { RED, BLUE, NONE }
     public enum TSELocation { LEFT, MIDDLE, RIGHT, NONE }
     public static class Global {
+        public static double stickDeadbandMin = 0.1; //10%, anything less than this is considered to be 0%
+        public static double stickDeadbandMax = 0.95; //95%, anything over this is considered to be 100%
     }
     public static class Auton {
         public static double autonDriveSpeed = 0.5;

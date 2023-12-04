@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 //import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.apache.commons.math3.analysis.function.Constant;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.hardware.hwMecanumFtclib;
 import org.firstinspires.ftc.teamcode.pidcontrollers.pidTurnControllerFtclib;
@@ -79,9 +80,20 @@ public class teleopMecanum extends OpMode {
 //        drive_turn = (pid_turning) ? turnpid.update(robot.getRobotYaw()) : 0.0;
         drive_fwd = distanceCorrectedPower(robot.driverOp.getLeftY());
         drive_strafe = distanceCorrectedPower(robot.driverOp.getLeftX());
-        drive_turn = robot.driverOp.getRightX();
+        drive_turn = stickDeadband(robot.driverOp.getRightX());
         if (Math.abs(drive_turn) > 0.1)
             pid_turning = false; //if we attempted to turn manually, disable pid turning
+
+        if (Constants.Drivetrain.useDriveStraight) {
+            /** useDriveStraight:
+             * If we are not requesting a turn and we are not doing a pid_turning function
+             * lets set the current heading */
+            if(Math.abs(drive_turn) < 0.1) {
+
+            }
+        }
+
+
         if (pid_turning) { //set new values for joysticks if we requested pid turning
             // update the pid controller
             turnpid.setTarget(pid_turn_target);
@@ -354,6 +366,12 @@ public class teleopMecanum extends OpMode {
             }
             robot.setTiltPower(power);
         }
+    }
+
+    public double stickDeadband(double value) {
+        if (Math.abs(value) <= Constants.Global.stickDeadbandMin) return 0.0;
+        if (Math.abs(value) >= Constants.Global.stickDeadbandMax) return Math.signum(value);
+        return value;
     }
 
     public double distanceCorrectedPower(double power) {

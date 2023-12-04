@@ -413,6 +413,7 @@ autonShortAuton3 extends OpMode {
         turnpid.setTarget(pid_turn_target);
         drive_fwd = (pid_driving) ? drivepid.update(robot.getDriveAvgPosition()) : 0.0;
         drive_strafe = (strafing) ? -Constants.Auton.autonStrafeSpeed * m_turn_multiplier : 0.0;
+        //in auton, drivestraight is easy since our target is always set by the auton and never the driver
         drive_turn = (pid_turning || Constants.Drivetrain.useDriveStraight) ? -turnpid.update(robot.getRobotYaw()) : 0.0;
         autonDrive(drive_fwd, drive_strafe, drive_turn, robot.getRobotYaw());
 

@@ -29,6 +29,8 @@ public class teleopMecanum extends OpMode {
     double m_turn_multiplier = 1.0;
 
     double drive_fwd, drive_strafe, drive_turn = 0.0; //used for holding requested drive values
+    double ds_heading = 0; //locked heading for drivestraight
+    boolean ds_locked = false; //used for drivestraight tracking
     double pid_turn_target = 0; //target degrees for pid turn
     boolean pid_turning = false; //tracking if we are using these pid controllers
     pidTurnControllerFtclib turnpid = new pidTurnControllerFtclib(this, pid_turn_target, Constants.Drivetrain.turnController.kP, Constants.Drivetrain.turnController.kI, Constants.Drivetrain.turnController.kD, Constants.Drivetrain.turnController.kF, Constants.Drivetrain.turnController.kIZone);
@@ -81,20 +83,24 @@ public class teleopMecanum extends OpMode {
         drive_fwd = distanceCorrectedPower(robot.driverOp.getLeftY());
         drive_strafe = distanceCorrectedPower(robot.driverOp.getLeftX());
         drive_turn = stickDeadband(robot.driverOp.getRightX());
-        if (Math.abs(drive_turn) > 0.1)
-            pid_turning = false; //if we attempted to turn manually, disable pid turning
+        if (drive_turn != 0.0) { //we have requested a turn using the joystick
+            pid_turning = false; //disable pid turning
+            ds_locked = false; //unlock drivestraight heading
+        }
 
         if (Constants.Drivetrain.useDriveStraight) {
             /** useDriveStraight:
-             * If we are not requesting a turn and we are not doing a pid_turning function
-             * lets set the current heading */
-            if(Math.abs(drive_turn) < 0.1) {
-
+             * If we are not requesting a turn and locked to a heading,
+             * lock the current robot heading
+             */
+            if(drive_turn == 0.0 && !ds_locked) {
+                ds_heading = robot.getRobotYaw();
+                ds_locked = true;
             }
         }
 
-
         if (pid_turning) { //set new values for joysticks if we requested pid turning
+            ds_locked = false; //always unlock the driveStraight when using pid turning
             // update the pid controller
             turnpid.setTarget(pid_turn_target);
             if (turnpid.atTarget(robot.getRobotYaw())) {
@@ -103,7 +109,12 @@ public class teleopMecanum extends OpMode {
             } else {
                 drive_turn = -turnpid.update(robot.getRobotYaw());
             }
+        } else if (Constants.Drivetrain.useDriveStraight && ds_locked) { //not pid turning, but useDriveStraight enabled and we have a heading locked
+            pid_turn_target = ds_heading; //set a new heading
+            turnpid.setTarget(pid_turn_target);
+            drive_turn = -turnpid.update(robot.getRobotYaw());
         }
+
         // perform the drive
         if (robot.getRobotYaw() == 0.0 || !robot.fieldCentric) { //exactly 0 from the imu is unlikely, fall back to robot centric
             robot.drive.driveRobotCentric(drive_strafe, drive_fwd, drive_turn);

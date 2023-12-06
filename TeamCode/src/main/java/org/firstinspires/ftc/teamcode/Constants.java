@@ -15,7 +15,7 @@ public class Constants {
     }
     public static class Drivetrain {
         public static boolean useFieldCentric = true; //try to use FC if gyro has value
-        public static boolean useDriveStraight = true; //use DriveStraight correction
+        public static boolean useDriveStraight = false; //use DriveStraight correction
         public static class woahNelly {
             public static boolean enabled = false; // use woahNelly system to slow down at backstage
             public static double distance = 10.0;//Inches from obstacle to adjust throttle when aimed at backstage

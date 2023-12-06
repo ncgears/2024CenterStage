@@ -4,7 +4,6 @@ import android.util.Size;
 
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.sfdev.assembly.state.StateMachine;
@@ -21,9 +20,9 @@ import org.firstinspires.ftc.teamcode.processors.tseSaturationProcessor;
 import org.firstinspires.ftc.vision.VisionPortal;
 
 @Autonomous(name="Short Auton", group="JRB")
-@Disabled
+//@Disabled
 public class
-autonShortAuton2 extends OpMode {
+autonShort extends OpMode {
     boolean m_long_auton = false; //set true if this is the long auton
     hwMecanumFtclib robot = new hwMecanumFtclib(this);
     ElapsedTime runtime = new ElapsedTime();
@@ -46,28 +45,40 @@ autonShortAuton2 extends OpMode {
     private tseSaturationProcessor visionProcessor;
     private VisionPortal visionPortal;
     boolean searchTSE = false;
+    boolean strafing = false;
     tseSaturationProcessor.Selected m_tse = tseSaturationProcessor.Selected.NONE;
 
     boolean isDone_pixel1, isDone_pixel2, isDone_pixel3 = false;
+    boolean needPixel1, needPixel2, needPixel3 = false;
+    boolean isAtPixel1, isAtPixel2, isAtPixel3 = false;
 
     // States for the finite state machine
     enum States {
         DETERMINE_TEAM, //Determine Alliance and set robot.alliance
         FIND_TSE, //Find the TSE and set m_tse
         MANIP_TRANSPORT, //Manipulator to the TRANSPORT position
+        DRIVE_SPIKE, //Drive to the center of the spike
+        DECIDE_PIXEL1, //Decide if we skip 1st pixel
         DRIVE_PIXEL1, //Drive to the MIDDLE pixel
         DROP_PIXEL1, //Drop the MIDDLE pixel (conditionally)
-        DRIVE_SPIKE, //Drive to the center of the spike
+        TURN_PIXEL1, //Backward to the 1st pixel
+        DRIVE_SPIKE2, //Return to the spike
         TURN_GOAL, //Turn toward Backstage (alliance specific)
-        DRIVE_PIXEL2, //Backward to the 2nd Pixel
+        DECIDE_PIXEL2, //Decide if we skip 2nd pixel
+        DRIVE_PIXEL2, //Backward to the 2nd pixel
         DROP_PIXEL2, //Drop the RIGHT pixel (conditionally)
-        DRIVE_PIXEL3, //Forward to the 3rd Pixel
+        DECIDE_PIXEL3, //Decide if we skip 3rd pixel
+        DRIVE_PIXEL3, //Forward to the 3rd pixel
         DROP_PIXEL3, //Drop the LEFT pixel (conditionally)
+        TURN_GOAL2, //Re-align to the backdrop
         DRIVE_MIDPOINT, //Drive to the midpoint
         MANIP_SCORE, //Manipulator to SCORE_AUTON position
         DRIVE_GOAL, //Drive to the backstage
         MANIP_DROP, //Manipulator to SCORE_AUTONDROP position
-        STRAFE_CLEAR, //Clear the backstage by moving left/right (alliance specific)
+        MANIP_TRANSPORT2, //Manipulator to TRANSPORT position
+        CLEAR_GOAL, //Back up from backdrop to not knock pixels off
+        STRAFE_CLEAR, //Clear the backdrop by moving left/right (alliance specific)
+        DRIVE_WALL, //Drive forward to backstage area to make sure we in zone
         RESTING //Doing nothing
     }
 
@@ -75,9 +86,6 @@ autonShortAuton2 extends OpMode {
     @Override
     public void init() {
         robot.init(hardwareMap);
-
-//        robot.setMotorInverted(false,true,true,false); //Not sure why its wrong only for auton.. This is a workaround.
-
         visionProcessor = new tseSaturationProcessor();
         try {
 //            visionPortal = VisionPortal.easyCreateWithDefaults(hardwareMap.get(WebcamName.class, "Webcam 1"), visionProcessor);
@@ -92,17 +100,19 @@ autonShortAuton2 extends OpMode {
         }
 
         machine = new StateMachineBuilder()
-                .state(States.DETERMINE_TEAM) //determines if we are red alliance/blue alliance
+                /** Identify which alliance we are */
+                .state(States.DETERMINE_TEAM)
                 .onEnter( () -> {
                     if(robot.alliance == Constants.Alliance.NONE) runCommand(Constants.Commands.DETERMINE_TEAM);
                 })
                 .onExit( () -> {
                     m_turn_multiplier = (robot.alliance == Constants.Alliance.RED) ? -1.0 : 1.0; //If red alliance, turns are reversed
-                    robot.playAudio(String.format("Alliance %s", robot.alliance.toString()),500);
+                    robot.playAudio(String.format("%s", robot.alliance.toString()),500);
                 })
-//                .transitionWithPointerState( () -> (robot.alliance != Constants.Alliance.NONE), States.FIND_TSE) //TODO: Comment this
+//                .transitionWithPointerState( () -> (robot.alliance != Constants.Alliance.NONE), States.STRAFE_CLEAR)
                 .transition( () -> (robot.alliance != Constants.Alliance.NONE))
-                .state(States.FIND_TSE) //Finds the team supplied element
+                /** Identify the TSE location */
+                .state(States.FIND_TSE)
                 .onEnter( () -> {
                     visionPortal.resumeStreaming();
                     //The TSE processor continuously tries to set the selected window
@@ -115,126 +125,205 @@ autonShortAuton2 extends OpMode {
                 .onExit( () -> {
                     searchTSE = false;
                     visionPortal.stopStreaming(); //stop streaming once we we know TSE location
-                    robot.playAudio(String.format("Prop %s",m_tse.toString()),500);
+                    robot.playAudio(String.format("%s",m_tse.toString()),500);
+                    needPixel1 = (m_tse == tseSaturationProcessor.Selected.MIDDLE);
+                    needPixel2 = (!needPixel1
+                        && ((robot.alliance == Constants.Alliance.BLUE && m_tse == tseSaturationProcessor.Selected.RIGHT)
+                            || (robot.alliance == Constants.Alliance.RED && m_tse == tseSaturationProcessor.Selected.LEFT))
+                    );
+                    needPixel3 = (!needPixel1 && !needPixel2);
                 })
-                .transitionWithPointerState( () -> (m_tse != tseSaturationProcessor.Selected.NONE), States.DRIVE_PIXEL1) //TODO: Comment this
-//                .transition( () -> (m_tse != tseSaturationProcessor.Selected.NONE))
+//                .transitionWithPointerState( () -> (m_tse != tseSaturationProcessor.Selected.NONE), States.DRIVE_SPIKE)
+                .transition( () -> (m_tse != tseSaturationProcessor.Selected.NONE))
+                /** Move manipulator to transport position */
                 .state(States.MANIP_TRANSPORT)
                 .onEnter( () -> {
                     m_manip_pos = Constants.Manipulator.Positions.TRANSPORT;
                 })
                 .transition(() -> (true))
-                .state(States.DRIVE_PIXEL1) //create state
-                .onEnter( () -> { //actions to perform when entering state
-//                    robot.playAudio("Drive Spike",500);
-                    pid_driving = true;
-                    driveInchesPID(34);
-                })
-                .onExit( () -> { //actions to perform when exiting state
-                    pid_driving = false;
-                })
-//                .transitionWithPointerState( () -> (pid_driving && drivepid.atTarget()), States.RESTING) //TODO: Comment this
-                .transition( () -> (pid_driving && drivepid.atTarget()) )
-                .state(States.DROP_PIXEL1)
-                .onEnter( () -> {
-                    if(m_tse == tseSaturationProcessor.Selected.MIDDLE) {
-                        robot.playAudio("Drop Pixel", 500);
-                        robot.setPixelPosition(Constants.PixelDropper.Positions.UP);
-                    } else isDone_pixel1 = true;
-                })
-                .transition( () -> (isDone_pixel1))
-                .transitionTimed(0.5)
-                .state(States.DRIVE_SPIKE) //create state
-                .onEnter( () -> { //actions to perform when entering state
-                    pid_driving = true;
-                    driveInchesPID(-13);
-                })
-                .onExit( () -> { //actions to perform when exiting state
-                    pid_driving = false;
-                })
-                .transition( () -> (pid_driving && drivepid.atTarget()) )
-                .state(States.TURN_GOAL) //create state
-                .onEnter( () -> { //actions to perform when entering state
-                    robot.playAudio("Turn backstage",500);
-                    pid_turning = true;
-                    turnToPID((90 * m_turn_multiplier));
-                })
-                .onExit( () -> { //actions to perform when exiting state
-                    pid_turning = false;
-                })
-//                .transitionWithPointerState( () -> (pid_turning && turnpid.atTarget(robot.getRobotYaw())), States.RESTING) //TODO: Comment this
-                .transition( () -> (pid_turning && turnpid.atTarget(robot.getRobotYaw())) )
-                .state(States.DRIVE_PIXEL2) //create state
-                .onEnter( () -> { //actions to perform when entering state
-                    robot.playAudio("Drive Pixel 2",500);
-                    pid_driving = true;
-                    driveInchesPID(-6);
-                })
-                .onExit( () -> { //actions to perform when exiting state
-                    pid_driving = false;
-                })
-                .transitionWithPointerState( () -> (pid_driving && drivepid.atTarget()), States.RESTING) //TODO: Comment this
-//                .transition( () -> (pid_driving && drivepid.atTarget()) )
-                .state(States.DROP_PIXEL2)
-                .onEnter( () -> {
-                    if((robot.alliance == Constants.Alliance.BLUE && m_tse == tseSaturationProcessor.Selected.RIGHT)
-                    || (robot.alliance == Constants.Alliance.RED && m_tse == tseSaturationProcessor.Selected.LEFT)) {
-                        robot.playAudio("Drop Pixel", 500);
-                        robot.setPixelPosition(Constants.PixelDropper.Positions.UP);
-                    } else isDone_pixel2 = true;
-                })
-                .transition( () -> (isDone_pixel2))
-                .transitionTimed(0.5)
-                .state(States.DRIVE_PIXEL3) //create state
-                .onEnter( () -> { //actions to perform when entering state
-                    robot.playAudio("Drive Pixel 3",500);
-                    pid_driving = true;
-                    driveInchesPID(12);
-                })
-                .onExit( () -> { //actions to perform when exiting state
-                    pid_driving = false;
-                })
-//                .transitionWithPointerState( () -> (pid_driving && drivepid.atTarget()), States.RESTING) //TODO: Comment this
-                .transition( () -> (pid_driving && drivepid.atTarget()) )
-                .state(States.DROP_PIXEL3)
+                /** Drive to the middle of the spike */
+                .state(States.DRIVE_SPIKE)
                 .onEnter( () -> {
                     elapsed.reset();
-                    if((robot.alliance == Constants.Alliance.BLUE && m_tse == tseSaturationProcessor.Selected.LEFT)
-                            || (robot.alliance == Constants.Alliance.RED && m_tse == tseSaturationProcessor.Selected.RIGHT)) {
-                        robot.playAudio("Drop Pixel", 500);
-                        robot.setPixelPosition(Constants.PixelDropper.Positions.UP);
-                    }
-                    isDone_pixel3 = true;
+                    double distance = (m_tse != tseSaturationProcessor.Selected.MIDDLE) ? 25 : 22;
+                    distance += (m_long_auton) ? -2.0 : 0.0;
+                    driveInchesPID(distance);
                 })
-                .transition( () -> (isDone_pixel3 && elapsed.seconds() > 0.5))
-                .transitionTimed(0.5)
-                .state(States.DRIVE_MIDPOINT) //create state
-                .onEnter( () -> { //actions to perform when entering state
-                    robot.playAudio("Drive midpoint",500);
-                    pid_driving = true;
-                    double distance = 5;
-                    distance += (m_long_auton) ? 48 : 0; //if a long auton, add another 48 inches here
-                    driveInchesPID(distance); //drive past the bars
-                })
-                .onExit( () -> { //actions to perform when exiting state
+                .onExit( () -> {
                     pid_driving = false;
                 })
                 .transition( () -> (pid_driving && drivepid.atTarget()) )
+                /** Decide if we can skip pixel 1 */
+                .state(States.DECIDE_PIXEL1)
+                .transitionWithPointerState( () -> (!needPixel1), States.TURN_GOAL)
+                .transition( () -> (true) )
+                /** Pixel 1: Turn to pixel */
+                .state(States.TURN_PIXEL1)
+                .onEnter( () -> {
+                    elapsed.reset();
+                    robot.playAudio("Turn pixel 1",500);
+                    turnToPID((180 * m_turn_multiplier));
+                })
+                .onExit( () -> {
+                    pid_turning = false;
+                })
+//                .transitionWithPointerState( () -> (pid_turning && turnpid.atTarget(robot.getRobotYaw())), States.RESTING)
+                .transition( () -> (elapsed.seconds() >= 3.0 && pid_turning && turnpid.atTarget(robot.getRobotYaw())) )
+                .transitionTimed(4.0)
+                /** Pixel 1: Drive to pixel */
+                .state(States.DRIVE_PIXEL1)
+                .onEnter( () -> {
+                    //robot.playAudio("Drive Pixel 1",500);
+                    elapsed.reset();
+                    driveInchesPID(-8);
+                })
+                .onExit( () -> {
+                    pid_driving = false;
+                    isAtPixel1 = true;
+                })
+//                .transitionWithPointerState( () -> (pid_driving && drivepid.atTarget()), States.RESTING)
+                .transition( () -> (pid_driving && drivepid.atTarget()) )
+                /** Pixel 1: Drop pixel */
+                .state(States.DROP_PIXEL1)
+                .onEnter( () -> {
+                    robot.playAudio("Drop Pixel 1", 500);
+                    robot.setPixelPosition(Constants.PixelDropper.Positions.UP);
+                    isDone_pixel1 = true;
+                })
+                .transition( () -> (isDone_pixel1))
+                .transitionTimed(0.3)
+                /** Pixel 1: Return to spike */
+                .state(States.DRIVE_SPIKE2)
+                .onEnter( () -> {
+                    //robot.playAudio("Drive Spike",500);
+                    elapsed.reset();
+                    driveInchesPID(3.75);
+                })
+                .onExit( () -> {
+                    pid_driving = false;
+                })
+//                .transitionWithPointerState( () -> (pid_driving && drivepid.atTarget()), States.RESTING)
+                .transition( () -> (pid_driving && drivepid.atTarget()) )
+                /** Turn toward Backstage */
+                .state(States.TURN_GOAL)
+                .onEnter( () -> {
+                    elapsed.reset();
+                    robot.playAudio("Turn backstage",500);
+                    turnToPID((90 * m_turn_multiplier));
+                })
+                .onExit( () -> {
+                    pid_turning = false;
+                })
+//                .transitionWithPointerState( () -> (pid_turning && turnpid.atTarget(robot.getRobotYaw())), States.RESTING)
+                .transition( () -> (elapsed.seconds() >= 1.5 && pid_turning && turnpid.atTarget(robot.getRobotYaw())) )
+                .transitionTimed(3.0)
+                /** Decide if we can skip pixel 2 */
+                .state(States.DECIDE_PIXEL2)
+                .transitionWithPointerState( () -> (!needPixel2), States.DECIDE_PIXEL3)
+                .transition( () -> (true))
+                /** Pixel 2: Drive to pixel */
+                .state(States.DRIVE_PIXEL2)
+                .onEnter( () -> {
+                    elapsed.reset();
+                    robot.playAudio("Drive Pixel 2",500);
+                    driveInchesPID(-8);
+                })
+                .onExit( () -> {
+                    pid_driving = false;
+                    isAtPixel2 = true;
+                })
+//                .transitionWithPointerState( () -> (pid_driving && drivepid.atTarget()), States.RESTING)
+                .transition( () -> (pid_driving && drivepid.atTarget()) )
+                /** Pixel 2: Drop pixel */
+                .state(States.DROP_PIXEL2)
+                .onEnter( () -> {
+                    robot.playAudio("Drop Pixel 2", 500);
+                    robot.setPixelPosition(Constants.PixelDropper.Positions.UP);
+                    isDone_pixel2 = true;
+                })
+                .transition( () -> (isDone_pixel2))
+                .transitionTimed(0.3)
+                /** Decide if we can skip pixel 3 */
+                .state(States.DECIDE_PIXEL3)
+                .transitionWithPointerState( () -> ((robot.alliance == Constants.Alliance.RED && m_tse != tseSaturationProcessor.Selected.RIGHT) || (robot.alliance == Constants.Alliance.BLUE && m_tse != tseSaturationProcessor.Selected.LEFT)), States.DRIVE_MIDPOINT)
+                .transition( () -> (true))
+                /** Pixel 3: Drive to pixel */
+                .state(States.DRIVE_PIXEL3)
+                .onEnter( () -> {
+                    robot.playAudio("Drive Pixel 3",500);
+                    elapsed.reset();
+                    double distance = 10.0;
+
+                    //if we were at pixel 2, add some distance
+                    distance += (isAtPixel2) ? 5.0 : 0.0;
+
+                    driveInchesPID(distance);
+                })
+                .onExit( () -> {
+                    pid_driving = false;
+                    isAtPixel3 = true;
+                })
+//                .transitionWithPointerState( () -> (pid_driving && drivepid.atTarget()), States.RESTING)
+                .transition( () -> (pid_driving && drivepid.atTarget()) )
+                /** Pixel 3: Drop pixel */
+                .state(States.DROP_PIXEL3)
+                .onEnter( () -> {
+                    robot.playAudio("Drop Pixel 3", 500);
+                    robot.setPixelPosition(Constants.PixelDropper.Positions.UP);
+                    isDone_pixel2 = true;
+                })
+                .transition( () -> (isDone_pixel3))
+                .transitionTimed(0.3)
+                /** Drive to midpoint */
+                .state(States.DRIVE_MIDPOINT)
+                .onEnter( () -> {
+                    robot.playAudio("Drive midpoint",500);
+                    elapsed.reset();
+                    double distance = 8.0;
+
+                    //if we were at pixel 2, add some distance
+                    distance += (isAtPixel2) ? 5.0 : 0.0;
+
+                    //if it is a long auton, add some distance
+                    distance += (m_long_auton) ? 30 : 0;
+                    driveInchesPID(distance);
+                })
+                .onExit( () -> {
+                    pid_driving = false;
+                })
+                .transition( () -> (robot.getDistance() > 0 && robot.getDistance() <= 3.0)) //distance sensor says we are close enough
+                .transition( () -> (pid_driving && drivepid.atTarget()) )
+                /** Move manipulator to transport position */
                 .state(States.MANIP_SCORE)
                 .onEnter( () -> {
                     m_manip_pos = Constants.Manipulator.Positions.SCORE_AUTO;
                 })
-                .transitionTimed(1.5)
-                .state(States.DRIVE_GOAL) //create state
-                .onEnter( () -> { //actions to perform when entering state
-                    robot.playAudio("Drive to backstage",500);
-                    pid_driving = true;
-                    driveInchesPID(3); //drive to the goal
+                .transition(() -> (true))
+                /** Re-align to backdrop */
+                .state(States.TURN_GOAL2)
+                .onEnter( () -> {
+                    elapsed.reset();
+                    //robot.playAudio("Turn backstage",500);
+                    turnToPID((90 * m_turn_multiplier));
                 })
-                .onExit( () -> { //actions to perform when exiting state
+                .onExit( () -> {
+                    pid_turning = false;
+                })
+                .transition( () -> (elapsed.seconds() >= 0.75 && pid_turning && turnpid.atTarget(robot.getRobotYaw())) )
+                .transitionTimed(1.5)
+                /** Drive to the backdrop */
+                .state(States.DRIVE_GOAL)
+                .onEnter( () -> {
+                    robot.playAudio("Drive to backstage",500);
+                    elapsed.reset();
+                    driveInchesPID(6);
+                })
+                .onExit( () -> {
                     pid_driving = false;
                 })
+                .transition( () -> (robot.getDistance() > 0 && robot.getDistance() <= 4.0)) //distance sensor says we are close enough
                 .transition( () -> (pid_driving && drivepid.atTarget()) )
+                /** Move manipulator to drop position for an amount of time */
                 .state(States.MANIP_DROP)
                 .onEnter( () -> {
                     robot.playAudio("Score Pixels",500);
@@ -244,17 +333,48 @@ autonShortAuton2 extends OpMode {
                     m_manip_pos = Constants.Manipulator.Positions.SCORE_AUTO;
                 })
                 .transitionTimed(1.5)
-                .state(States.STRAFE_CLEAR)
+                /** Back up from backdrop so we don't knock off pixels */
+                .state(States.CLEAR_GOAL)
                 .onEnter( () -> {
                     robot.playAudio("Get out the way",500);
-                    //STRAFE sideways to clear the board
-                    autonDrive(0, Constants.Auton.autonDriveSpeed * m_turn_multiplier, 0, robot.getRobotYaw());
+                    driveInchesPID(-7.0);
                 })
-                .transitionTimed(2.5)
-                .state(States.RESTING) //create state
-                .onEnter( () -> { //actions to perform when entering state
+                .onExit( () -> {
+                    pid_driving = false;
+                })
+                .transitionWithPointerState( () -> (m_long_auton), States.RESTING) //If it was a long auton, just stay here
+                .transition( () -> (pid_driving && drivepid.atTarget()) )
+                /** Move manipulator to transport position */
+                .state(States.MANIP_TRANSPORT2)
+                .onEnter( () -> {
+                    m_manip_pos = Constants.Manipulator.Positions.TRANSPORT;
+                })
+                .transition(() -> (true))
+                /** Move sideways to clear the backdrop for another robot */
+                .state(States.STRAFE_CLEAR)
+                .onEnter( () -> {
+                    strafing = true;
+                })
+                .onExit( () -> {
+                    strafing = false;
+                })
+                .transitionTimed(1.5)
+                /** Drive forward to the backstage area */
+                .state(States.DRIVE_WALL)
+                .onEnter( () -> {
+                    driveInchesPID(10);
+                })
+                .onExit( () -> {
+                    pid_driving = false;
+                })
+                .transition( () -> (robot.getDistance() > 0 && robot.getDistance() <= 3.0)) //distance sensor says we are close enough
+                .transition( () -> (pid_driving && drivepid.atTarget()) )
+                /** Wait until end of auton */
+                .state(States.RESTING)
+                .onEnter( () -> {
                     pid_driving = false;
                     pid_turning = false;
+                    strafing = false;
                     robot.playAudio("Resting",500);
                 })
                 .build();
@@ -291,16 +411,18 @@ autonShortAuton2 extends OpMode {
         // Monitor for TSE
         if(searchTSE) m_tse = visionProcessor.getSelection();
 
-        // Monitor for buttons
-        if(robot.driverOp.getButton(GamepadKeys.Button.BACK)) runCommand(Constants.Commands.GYRO_RESET);
-
         // PID Driving
         drivepid.setTarget(pid_drive_target);
         turnpid.setTarget(pid_turn_target);
         drive_fwd = (pid_driving) ? drivepid.update(robot.getDriveAvgPosition()) : 0.0;
-        drive_strafe = 0.0;
-        drive_turn = (pid_turning) ? -turnpid.update(robot.getRobotYaw()) : 0.0;
-        autonDrive(drive_fwd, 0, drive_turn, robot.getRobotYaw());
+        drive_strafe = (strafing) ? -Constants.Auton.autonStrafeSpeed * m_turn_multiplier : 0.0;
+        //in auton, drivestraight is easy since our target is always set by the auton and never the driver
+        drive_turn = (pid_turning || Constants.Drivetrain.useDriveStraight) ? -turnpid.update(robot.getRobotYaw()) : 0.0;
+        autonDrive(drive_fwd, drive_strafe, drive_turn, robot.getRobotYaw());
+
+//this isnt working.. not sure why
+//        if (pid_turning && turnpid.atTarget(robot.getRobotYaw())) pid_turning = false;
+//        if (pid_driving && drivepid.atTarget()) pid_driving = false;
 
         if(m_last_command != Constants.Commands.NONE && runtime.seconds() - m_last_command_time > 2) { //reset the last command after 2 seconds
             runCommand(Constants.Commands.NONE);
@@ -320,19 +442,13 @@ autonShortAuton2 extends OpMode {
         runCommand(Constants.Commands.ROBOT_RESET);
     }
 
-    public void teleopDrive() {
-        robot.drive.driveFieldCentric(
-                robot.driverOp.getLeftX(),
-                robot.driverOp.getLeftY(),
-                robot.driverOp.getRightX(),
-                robot.getRobotYaw()
-        );
-    }
-
     public void autonDrive(double fwd, double strafe, double turn, double headingDegrees) {
 //        robot.drive.driveFieldCentric(strafe,fwd,turn,headingDegrees);
         robot.drive.driveRobotCentric(strafe,fwd,turn);
     }
+
+    public boolean isPidDriving() { return pid_driving; }
+    public boolean isPidTurning() { return pid_turning; }
 
     public void runCommand(Constants.Commands command) {
         m_last_command = command;
@@ -340,6 +456,7 @@ autonShortAuton2 extends OpMode {
         switch (command) {
             case GYRO_RESET:
                 robot.imu.resetYaw();
+                robot.playAudio("Reset Gyro", 500);
                 break;
             case TOGGLE_PIXEL:
                 if(robot.getPixelPosition() == Constants.PixelDropper.Positions.DOWN) {
@@ -367,6 +484,7 @@ autonShortAuton2 extends OpMode {
     }
 
     public void driveInchesPID(double targetInches) {
+        pid_driving = true;
         robot.resetAllDriveEncoder();
         pid_drive_target = targetInches * Constants.Drivetrain.driveController.ticksPerInch + robot.getDriveAvgPosition();
     }

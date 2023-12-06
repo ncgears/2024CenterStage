@@ -84,6 +84,7 @@ public class hwMecanumFtclib {
     public DigitalChannel m_flag_a, m_flag_b = null;
     public Alliance alliance = Alliance.NONE;
     public boolean fieldCentric = true;
+    public boolean driveStraight = true;
 
     // Manipulator related stuff
     public Motor m_tilt_motor, m_elev_motor = null;
@@ -132,6 +133,7 @@ public class hwMecanumFtclib {
         Motor[] m_motors = {m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr};
         drive = new MecanumDrive(false, m_motor_fl, m_motor_fr, m_motor_rl, m_motor_rr); //do not invert right, we handle this later to fix encoders too
         fieldCentric = Constants.Drivetrain.useFieldCentric;
+        driveStraight = Constants.Drivetrain.useDriveStraight;
         ignoreDistance = false;
 
         // Gamepads
@@ -284,8 +286,8 @@ public class hwMecanumFtclib {
     public Alliance determineAlliance() {
         try {
             //digital channels have pull-up resistor so they are high normally
-            if(!m_flag_a.getState() && !m_flag_b.getState()) return Alliance.RED; //if neither switches, red flag
-            if(!m_flag_a.getState() || !m_flag_b.getState()) return Alliance.BLUE; //if one switch, blue flag
+            if(m_flag_a.getState() && m_flag_b.getState()) return Alliance.RED; //if neither switches, red flag
+            if(m_flag_a.getState() || m_flag_b.getState()) return Alliance.BLUE; //if one switch, blue flag
             return Alliance.NONE; //indeterminate, either flag not installed or a wiring fault
         } catch(Exception e) {
             myOpMode.telemetry.addLine("ERROR: Unable to determine alliance");

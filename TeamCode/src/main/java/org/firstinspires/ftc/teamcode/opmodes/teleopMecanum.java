@@ -36,9 +36,9 @@ public class teleopMecanum extends OpMode {
     pidTurnControllerFtclib turnpid = new pidTurnControllerFtclib(this, pid_turn_target, Constants.Drivetrain.turnController.kP, Constants.Drivetrain.turnController.kI, Constants.Drivetrain.turnController.kD, Constants.Drivetrain.turnController.kF, Constants.Drivetrain.turnController.kIZone);
     pidTiltController tiltpid = new pidTiltController(this, m_manip_pos.getTilt(), Constants.Manipulator.tiltController.kP, Constants.Manipulator.tiltController.kI, Constants.Manipulator.tiltController.kD, Constants.Manipulator.tiltController.kF, Constants.Manipulator.tiltController.kIZone);
     pidElevatorController elevpid = new pidElevatorController(this, m_manip_pos.getElevator(), Constants.Manipulator.elevatorController.kP, Constants.Manipulator.elevatorController.kI, Constants.Manipulator.elevatorController.kD, Constants.Manipulator.elevatorController.kF, Constants.Manipulator.elevatorController.kIZone);
-    boolean tilt_low_limit = false;
+    boolean tilt_low_limit, tilt_high_limit = false;
 
-    boolean d_a, d_b, d_x, d_y, d_lb = false; //for debouncing driver button presses
+    boolean d_a, d_b, d_x, d_y, d_lb, d_lt = false; //for debouncing driver button presses
     boolean o_rb, o_lb, o_up, o_dn, o_lt, o_rt = false; //for debouncing operator button presses
 
     @Override
@@ -53,6 +53,7 @@ public class teleopMecanum extends OpMode {
         // always listen for gyro reset button
         if(robot.driverOp.getButton(GamepadKeys.Button.BACK) && runtime.seconds() - m_last_command_time > 0.5) {
             robot.imu.resetYaw();
+            robot.playAudio("Reset Gyro", 500);
             telemCommand("RESET GYRO");
         }
 //        // Don't do this while waiting for teleop, robot doesnt get reset between auton and teleop
@@ -88,7 +89,7 @@ public class teleopMecanum extends OpMode {
             ds_locked = false; //unlock drivestraight heading
         }
 
-        if (Constants.Drivetrain.useDriveStraight) {
+        if (robot.driveStraight) {
             /** useDriveStraight:
              * If we are not requesting a turn and locked to a heading,
              * lock the current robot heading
@@ -109,7 +110,7 @@ public class teleopMecanum extends OpMode {
             } else {
                 drive_turn = -turnpid.update(robot.getRobotYaw());
             }
-        } else if (Constants.Drivetrain.useDriveStraight && ds_locked) { //not pid turning, but useDriveStraight enabled and we have a heading locked
+        } else if (robot.driveStraight && ds_locked) { //not pid turning, but useDriveStraight enabled and we have a heading locked
             pid_turn_target = ds_heading; //set a new heading
             turnpid.setTarget(pid_turn_target);
             drive_turn = -turnpid.update(robot.getRobotYaw());
@@ -126,6 +127,7 @@ public class teleopMecanum extends OpMode {
         // always listen for gyro reset button
         if (robot.driverOp.getButton(GamepadKeys.Button.BACK)) {
             robot.imu.resetYaw();
+            robot.playAudio("Reset Gyro", 500);
             telemCommand("RESET GYRO");
         } else if (robot.driverOp.getButton(GamepadKeys.Button.START)) {
             m_manip_pos = Constants.Manipulator.Positions.START;
@@ -172,6 +174,13 @@ public class teleopMecanum extends OpMode {
             robot.playAudio((robot.fieldCentric) ? "Field Centric" : "Robot Centric", 500);
         }
         else if (d_lb && !robot.driverOp.getButton(GamepadKeys.Button.LEFT_BUMPER)) { d_lb = false; }
+        if (d_lt && robot.driverOp.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) < 0.5) {
+            d_lt = false;
+        } else if (!d_lt && robot.driverOp.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) >= 0.5) {
+            d_lt = true;
+            robot.driveStraight = !robot.driveStraight;
+            robot.playAudio((robot.driveStraight) ? "Heading Lock Yes" : "Heading Lock No", 500);
+        }
 
         // automated field-relative turn functions for d-pad
         if (robot.driverOp.getButton(GamepadKeys.Button.DPAD_LEFT) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_DOWN) && !robot.driverOp.getButton(GamepadKeys.Button.DPAD_UP)) {
@@ -226,6 +235,12 @@ public class teleopMecanum extends OpMode {
                     break;
                 default:
             }
+        } else if (o_lt && robot.operOp.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) < 0.5) { //release scoring button
+                o_lt = false;
+        } else if (!o_lt && robot.operOp.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) >= 0.5) { //press scoring button
+                o_lt = true;
+                m_manip_pos = Constants.Manipulator.Positions.FLOOR_FAR;
+                telemCommand("FLOOR FAR");
         } else if (!o_rb && robot.operOp.getButton(GamepadKeys.Button.RIGHT_BUMPER)) { //position up
             o_rb = true;
             switch (m_manip_pos) {
@@ -368,15 +383,22 @@ public class teleopMecanum extends OpMode {
         if(tilt_low_limit) {
             tiltpid.setTarget(robot.getTiltPosition());
             tilt_low_limit = false;
+        } else if (tilt_high_limit) {
+            tiltpid.setTarget(robot.getTiltPosition());
+            tilt_high_limit = false;
         } else {
             tiltpid.setTargetPosition(m_manip_pos);
-            double power = tiltpid.update(robot.getTiltPosition());
-            if(power < 0 && robot.getTiltLowLimit()) {
-                tiltpid.setTarget(robot.getTiltPosition());
-                tilt_low_limit = true;
-            }
-            robot.setTiltPower(power);
         }
+        double power = tiltpid.update(robot.getTiltPosition());
+        if(power < 0 && robot.getTiltLowLimit()) {
+            tiltpid.setTarget(robot.getTiltPosition());
+            tilt_low_limit = true;
+        }
+        if(power > 0 && robot.getTiltHighLimit()) {
+            tiltpid.setTarget(robot.getTiltPosition());
+            tilt_high_limit = true;
+        }
+        robot.setTiltPower(power);
     }
 
     public double stickDeadband(double value) {
@@ -409,6 +431,7 @@ public class teleopMecanum extends OpMode {
         telemetry.addData("Alliance", robot.alliance.toString());
         telemetry.addData("Last Command", m_last_command.toString());
         telemetry.addData("Robot Drive", "%s Centric", (robot.fieldCentric) ? "Field" : "Robot");
+        telemetry.addData("Heading Lock", (robot.driveStraight) ? "YES" : "NO");
         telemetry.addData("Robot Heading", "%.2f", robot.getRobotYaw());
         telemetry.addData("Obstacle Distance", "%.2f Inches", robot.getDistance());
         telemetry.addData("Pixel Dropper", robot.getPixelPosition().toString());

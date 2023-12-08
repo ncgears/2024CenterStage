@@ -108,11 +108,13 @@ public class hwMecanumFtclib {
     /* Local OpMode members. */
     HardwareMap hwMap = null;
     OpMode myOpMode = null;   // gain access to methods in the calling OpMode.
+    boolean teleop = false;
 //    private LinearOpMode myOpMode = null;   // gain access to methods in the calling OpMode.
 
     // Define a constructor that allows the OpMode to pass a reference to itself.
     public hwMecanumFtclib(OpMode opmode) {
         myOpMode = opmode;
+        teleop = (myOpMode.toString() == "com.qualcomm.robotcore.eventloop.opmode.teleopMecanum");
     }
     /**
      * Initialize all the robot's hardware.
@@ -121,6 +123,7 @@ public class hwMecanumFtclib {
      * All of the hardware devices are accessed via the hardware map, and initialized.
      */
     public void init(HardwareMap ahwMap) {
+        myOpMode.telemetry.addLine(myOpMode.toString());
         hwMap = ahwMap;
         // Define and Initialize Motors
         imu = hwMap.get(IMU.class, "imu"); //imu is BNO055 in EH
@@ -162,7 +165,7 @@ public class hwMecanumFtclib {
 //                m_tilt_motor.set(-Constants.Manipulator.tiltController.homingSpeed);
 //            }
 //            m_tilt_motor.set(0);
-            m_tilt_motor.resetEncoder();
+            if(!teleop) m_tilt_motor.resetEncoder();
         } catch(Exception e) {
             myOpMode.telemetry.addLine("ERROR: Could not init Tilt");
         }
@@ -174,7 +177,7 @@ public class hwMecanumFtclib {
             m_elev_motor = new Motor(hwMap, "elev motor");
             m_elev_motor.setRunMode(Motor.RunMode.RawPower);
             m_elev_motor.setInverted(false);
-            m_elev_motor.resetEncoder();
+            if(!teleop) m_elev_motor.resetEncoder();
         } catch(Exception e) {
             myOpMode.telemetry.addLine("ERROR: Could not init Elevator");
         }

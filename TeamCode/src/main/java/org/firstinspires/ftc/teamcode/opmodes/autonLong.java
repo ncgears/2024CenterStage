@@ -147,7 +147,7 @@ autonLong extends OpMode {
                     elapsed.reset();
 
                     double distance = (m_tse != tseSaturationProcessor.Selected.MIDDLE) ? 25 : 22;
-                    distance += (needPixel2 || m_long_auton) ? -4.0 : 0.0;
+                    distance += (needPixel2 || m_long_auton) ? -5.0 : 0.0;
                     driveInchesPID(distance);
                 })
                 .onExit( () -> {
@@ -227,7 +227,7 @@ autonLong extends OpMode {
                 .onEnter( () -> {
                     elapsed.reset();
                     robot.playAudio("Drive Pixel 2",500);
-                    driveInchesPID(-8);
+                    driveInchesPID(-5.0);
                 })
                 .onExit( () -> {
                     pid_driving = false;

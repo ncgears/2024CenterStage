@@ -145,8 +145,9 @@ autonShort extends OpMode {
                 .state(States.DRIVE_SPIKE)
                 .onEnter( () -> {
                     elapsed.reset();
+
                     double distance = (m_tse != tseSaturationProcessor.Selected.MIDDLE) ? 25 : 22;
-                    distance += (needPixel2 || m_long_auton) ? -2.0 : 0.0;
+                    distance += (needPixel2 || m_long_auton) ? -4.0 : 0.0;
                     driveInchesPID(distance);
                 })
                 .onExit( () -> {

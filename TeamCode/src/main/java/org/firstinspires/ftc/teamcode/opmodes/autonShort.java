@@ -358,7 +358,7 @@ autonShort extends OpMode {
                 .onExit( () -> {
                     strafing = false;
                 })
-                .transitionTimed(1.5)
+                .transitionTimed(1.3)
                 /** Drive forward to the backstage area */
                 .state(States.DRIVE_WALL)
                 .onEnter( () -> {
@@ -417,7 +417,7 @@ autonShort extends OpMode {
         drive_fwd = (pid_driving) ? drivepid.update(robot.getDriveAvgPosition()) : 0.0;
         drive_strafe = (strafing) ? -Constants.Auton.autonStrafeSpeed * m_turn_multiplier : 0.0;
         //in auton, drivestraight is easy since our target is always set by the auton and never the driver
-        drive_turn = (pid_turning || Constants.Drivetrain.useDriveStraight) ? -turnpid.update(robot.getRobotYaw()) : 0.0;
+        drive_turn = (pid_turning || Constants.Auton.autonDriveStraight) ? -turnpid.update(robot.getRobotYaw()) : 0.0;
         autonDrive(drive_fwd, drive_strafe, drive_turn, robot.getRobotYaw());
 
 //this isnt working.. not sure why

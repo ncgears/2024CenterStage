@@ -245,7 +245,7 @@ autonShort extends OpMode {
                 .transitionTimed(0.3)
                 /** Decide if we can skip pixel 3 */
                 .state(States.DECIDE_PIXEL3)
-                .transitionWithPointerState( () -> ((robot.alliance == Constants.Alliance.RED && m_tse != tseSaturationProcessor.Selected.RIGHT) || (robot.alliance == Constants.Alliance.BLUE && m_tse != tseSaturationProcessor.Selected.LEFT)), States.DRIVE_MIDPOINT)
+                .transitionWithPointerState( () -> (!needPixel3), States.DRIVE_MIDPOINT)
                 .transition( () -> (true))
                 /** Pixel 3: Drive to pixel */
                 .state(States.DRIVE_PIXEL3)
@@ -280,6 +280,9 @@ autonShort extends OpMode {
                     robot.playAudio("Drive midpoint",500);
                     elapsed.reset();
                     double distance = 8.0;
+
+                    //if we were at pixel 1, add some distance
+                    distance += (isAtPixel1) ? 10.0 : 0.0;
 
                     //if we were at pixel 2, add some distance
                     distance += (isAtPixel2) ? 5.0 : 0.0;

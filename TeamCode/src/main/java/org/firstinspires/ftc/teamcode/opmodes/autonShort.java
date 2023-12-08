@@ -254,9 +254,6 @@ autonShort extends OpMode {
                     elapsed.reset();
                     double distance = 10.0;
 
-                    //if we were at pixel 2, add some distance
-                    distance += (isAtPixel2) ? 5.0 : 0.0;
-
                     driveInchesPID(distance);
                 })
                 .onExit( () -> {
@@ -285,7 +282,7 @@ autonShort extends OpMode {
                     distance += (isAtPixel1) ? 10.0 : 0.0;
 
                     //if we were at pixel 2, add some distance
-                    distance += (isAtPixel2) ? 5.0 : 0.0;
+                    distance += (isAtPixel2) ? 15.0 : 0.0;
 
                     //if it is a long auton, add some distance
                     distance += (m_long_auton) ? 30 : 0;

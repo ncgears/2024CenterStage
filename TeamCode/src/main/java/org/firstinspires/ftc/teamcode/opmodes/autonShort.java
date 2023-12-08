@@ -233,7 +233,7 @@ autonShort extends OpMode {
                     pid_driving = false;
                     isAtPixel2 = true;
                 })
-//                .transitionWithPointerState( () -> (pid_driving && drivepid.atTarget()), States.RESTING)
+//                .transitionWithPoint(erState( () -> (pid_driving && drivepid.atTarget()), States.RESTING)
                 .transition( () -> (pid_driving && drivepid.atTarget()) )
                 /** Pixel 2: Drop pixel */
                 .state(States.DROP_PIXEL2)

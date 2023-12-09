@@ -288,7 +288,7 @@ autonLong extends OpMode {
                     distance += (isAtPixel2) ? 15.0 : 0.0;
 
                     //if it is a long auton, add some distance
-                    distance += (m_long_auton) ? 30 : 0;
+                    distance += (m_long_auton) ? 36 : 0;
                     driveInchesPID(distance);
                 })
                 .onExit( () -> {

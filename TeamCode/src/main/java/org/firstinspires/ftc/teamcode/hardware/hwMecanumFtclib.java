@@ -161,11 +161,8 @@ public class hwMecanumFtclib {
             m_tilt_motor = new Motor(hwMap, "tilt motor");
             m_tilt_motor.setRunMode(Motor.RunMode.RawPower);
             m_tilt_motor.setInverted(false);
-//            while (getTiltLowLimit()) {
-//                m_tilt_motor.set(-Constants.Manipulator.tiltController.homingSpeed);
-//            }
-//            m_tilt_motor.set(0);
-            if(!teleop) m_tilt_motor.resetEncoder();
+//            if(!teleop) m_tilt_motor.resetEncoder();
+            m_tilt_motor.resetEncoder();
         } catch(Exception e) {
             myOpMode.telemetry.addLine("ERROR: Could not init Tilt");
         }
@@ -177,7 +174,8 @@ public class hwMecanumFtclib {
             m_elev_motor = new Motor(hwMap, "elev motor");
             m_elev_motor.setRunMode(Motor.RunMode.RawPower);
             m_elev_motor.setInverted(false);
-            if(!teleop) m_elev_motor.resetEncoder();
+//            if(!teleop) m_elev_motor.resetEncoder();
+            m_elev_motor.resetEncoder();
         } catch(Exception e) {
             myOpMode.telemetry.addLine("ERROR: Could not init Elevator");
         }

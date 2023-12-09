@@ -77,6 +77,8 @@ autonShort extends OpMode {
         MANIP_DROP, //Manipulator to SCORE_AUTONDROP position
         MANIP_TRANSPORT2, //Manipulator to TRANSPORT position
         CLEAR_GOAL, //Back up from backdrop to not knock pixels off
+        TURN_AWAY, //Turn away from driver
+        MANIP_START, //Manipulator to START position
         STRAFE_CLEAR, //Clear the backdrop by moving left/right (alliance specific)
         DRIVE_WALL, //Drive forward to backstage area to make sure we in zone
         RESTING //Doing nothing
@@ -343,14 +345,31 @@ autonShort extends OpMode {
                 .onExit( () -> {
                     pid_driving = false;
                 })
-                .transitionWithPointerState( () -> (m_long_auton), States.RESTING) //If it was a long auton, just stay here
                 .transition( () -> (pid_driving && drivepid.atTarget()) )
                 /** Move manipulator to transport position */
                 .state(States.MANIP_TRANSPORT2)
                 .onEnter( () -> {
                     m_manip_pos = Constants.Manipulator.Positions.TRANSPORT;
                 })
+                .transitionWithPointerState( () -> (!m_long_auton), States.STRAFE_CLEAR)
                 .transition(() -> (true))
+                /** Re-align to backdrop */
+                .state(States.TURN_AWAY)
+                .onEnter( () -> {
+                    elapsed.reset();
+                    //robot.playAudio("Turn backstage",500);
+                    turnToPID(0);
+                })
+                .onExit( () -> {
+                    pid_turning = false;
+                })
+                .transition( () -> (elapsed.seconds() >= 0.75 && pid_turning && turnpid.atTarget(robot.getRobotYaw())) )
+                /** Move manipulator to start position */
+                .state(States.MANIP_START)
+                .onEnter( () -> {
+                    m_manip_pos = Constants.Manipulator.Positions.TRANSPORT;
+                })
+                .transitionWithPointerState( () -> (true), States.RESTING)
                 /** Move sideways to clear the backdrop for another robot */
                 .state(States.STRAFE_CLEAR)
                 .onEnter( () -> {

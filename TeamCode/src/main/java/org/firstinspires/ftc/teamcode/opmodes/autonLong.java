@@ -19,11 +19,11 @@ import org.firstinspires.ftc.teamcode.pidcontrollers.pidTurnControllerFtclib;
 import org.firstinspires.ftc.teamcode.processors.tseSaturationProcessor;
 import org.firstinspires.ftc.vision.VisionPortal;
 
-@Autonomous(name="Long Auton", group="JRB")
+@Autonomous(name="Short Auton", group="JRB")
 //@Disabled
 public class
 autonLong extends OpMode {
-    boolean m_long_auton = true; //set true if this is the long auton
+    boolean m_long_auton = false; //set true if this is the long auton
     hwMecanumFtclib robot = new hwMecanumFtclib(this);
     ElapsedTime runtime = new ElapsedTime();
     ElapsedTime elapsed = new ElapsedTime();
@@ -78,7 +78,7 @@ autonLong extends OpMode {
         MANIP_TRANSPORT2, //Manipulator to TRANSPORT position
         CLEAR_GOAL, //Back up from backdrop to not knock pixels off
         TURN_AWAY, //Turn away from driver
-        MANIP_START, //Manipulator to START position
+        MANIP_ZERO, //Manipulator to ZERO position
         STRAFE_CLEAR, //Clear the backdrop by moving left/right (alliance specific)
         DRIVE_WALL, //Drive forward to backstage area to make sure we in zone
         RESTING //Doing nothing
@@ -353,7 +353,7 @@ autonLong extends OpMode {
                 })
                 .transitionWithPointerState( () -> (!m_long_auton), States.STRAFE_CLEAR)
                 .transition(() -> (true))
-                /** Re-align to backdrop */
+                /** Turn away from driver */
                 .state(States.TURN_AWAY)
                 .onEnter( () -> {
                     elapsed.reset();
@@ -363,7 +363,7 @@ autonLong extends OpMode {
                 .onExit( () -> {
                     pid_turning = false;
                 })
-                .transitionWithPointerState( () -> (true), States.RESTING)
+                .transitionWithPointerState( () -> (true), States.MANIP_ZERO)
                 /** Move sideways to clear the backdrop for another robot */
                 .state(States.STRAFE_CLEAR)
                 .onEnter( () -> {
@@ -383,10 +383,15 @@ autonLong extends OpMode {
                 })
                 .transition( () -> (robot.getDistance() > 0 && robot.getDistance() <= 3.0)) //distance sensor says we are close enough
                 .transition( () -> (pid_driving && drivepid.atTarget()) )
+                /** Move manipulator to transport position */
+                .state(States.MANIP_ZERO)
+                .onEnter( () -> {
+                    m_manip_pos = Constants.Manipulator.Positions.ZERO;
+                })
+                .transitionTimed(0.5)
                 /** Wait until end of auton */
                 .state(States.RESTING)
                 .onEnter( () -> {
-                    m_manip_pos = Constants.Manipulator.Positions.ZERO;
                     pid_driving = false;
                     pid_turning = false;
                     strafing = false;

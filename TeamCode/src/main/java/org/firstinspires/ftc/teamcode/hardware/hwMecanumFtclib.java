@@ -114,7 +114,7 @@ public class hwMecanumFtclib {
     // Define a constructor that allows the OpMode to pass a reference to itself.
     public hwMecanumFtclib(OpMode opmode) {
         myOpMode = opmode;
-        teleop = (myOpMode.toString() == "com.qualcomm.robotcore.eventloop.opmode.teleopMecanum");
+        teleop = (myOpMode.toString().indexOf("teleopMecanum") > 0); //"org.firstinspires.ftc.teamcode.opmodes.teleopMecanum"
     }
     /**
      * Initialize all the robot's hardware.
@@ -123,7 +123,6 @@ public class hwMecanumFtclib {
      * All of the hardware devices are accessed via the hardware map, and initialized.
      */
     public void init(HardwareMap ahwMap) {
-        myOpMode.telemetry.addLine(myOpMode.toString());
         hwMap = ahwMap;
         // Define and Initialize Motors
         imu = hwMap.get(IMU.class, "imu"); //imu is BNO055 in EH

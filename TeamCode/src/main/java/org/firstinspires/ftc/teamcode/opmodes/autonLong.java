@@ -77,6 +77,8 @@ autonLong extends OpMode {
         MANIP_DROP, //Manipulator to SCORE_AUTONDROP position
         MANIP_TRANSPORT2, //Manipulator to TRANSPORT position
         CLEAR_GOAL, //Back up from backdrop to not knock pixels off
+        TURN_AWAY, //Turn away from driver
+        MANIP_START, //Manipulator to START position
         STRAFE_CLEAR, //Clear the backdrop by moving left/right (alliance specific)
         DRIVE_WALL, //Drive forward to backstage area to make sure we in zone
         RESTING //Doing nothing
@@ -227,13 +229,13 @@ autonLong extends OpMode {
                 .onEnter( () -> {
                     elapsed.reset();
                     robot.playAudio("Drive Pixel 2",500);
-                    driveInchesPID(-5.0);
+                    driveInchesPID(-5);
                 })
                 .onExit( () -> {
                     pid_driving = false;
                     isAtPixel2 = true;
                 })
-//                .transitionWithPointerState( () -> (pid_driving && drivepid.atTarget()), States.RESTING)
+//                .transitionWithPoint(erState( () -> (pid_driving && drivepid.atTarget()), States.RESTING)
                 .transition( () -> (pid_driving && drivepid.atTarget()) )
                 /** Pixel 2: Drop pixel */
                 .state(States.DROP_PIXEL2)
@@ -286,7 +288,7 @@ autonLong extends OpMode {
                     distance += (isAtPixel2) ? 15.0 : 0.0;
 
                     //if it is a long auton, add some distance
-                    distance += (m_long_auton) ? 36 : 0;
+                    distance += (m_long_auton) ? 30 : 0;
                     driveInchesPID(distance);
                 })
                 .onExit( () -> {
@@ -317,7 +319,7 @@ autonLong extends OpMode {
                 .onEnter( () -> {
                     robot.playAudio("Drive to backstage",500);
                     elapsed.reset();
-                    driveInchesPID(8);
+                    driveInchesPID(6);
                 })
                 .onExit( () -> {
                     pid_driving = false;
@@ -343,14 +345,31 @@ autonLong extends OpMode {
                 .onExit( () -> {
                     pid_driving = false;
                 })
-                .transitionWithPointerState( () -> (m_long_auton), States.RESTING) //If it was a long auton, just stay here
                 .transition( () -> (pid_driving && drivepid.atTarget()) )
                 /** Move manipulator to transport position */
                 .state(States.MANIP_TRANSPORT2)
                 .onEnter( () -> {
                     m_manip_pos = Constants.Manipulator.Positions.TRANSPORT;
                 })
+                .transitionWithPointerState( () -> (!m_long_auton), States.STRAFE_CLEAR)
                 .transition(() -> (true))
+                /** Re-align to backdrop */
+                .state(States.TURN_AWAY)
+                .onEnter( () -> {
+                    elapsed.reset();
+                    //robot.playAudio("Turn backstage",500);
+                    turnToPID(0);
+                })
+                .onExit( () -> {
+                    pid_turning = false;
+                })
+                .transition( () -> (elapsed.seconds() >= 0.75 && pid_turning && turnpid.atTarget(robot.getRobotYaw())) )
+                /** Move manipulator to start position */
+                .state(States.MANIP_START)
+                .onEnter( () -> {
+                    m_manip_pos = Constants.Manipulator.Positions.TRANSPORT;
+                })
+                .transitionWithPointerState( () -> (true), States.RESTING)
                 /** Move sideways to clear the backdrop for another robot */
                 .state(States.STRAFE_CLEAR)
                 .onEnter( () -> {
@@ -359,7 +378,7 @@ autonLong extends OpMode {
                 .onExit( () -> {
                     strafing = false;
                 })
-                .transitionTimed(1.5)
+                .transitionTimed(1.3)
                 /** Drive forward to the backstage area */
                 .state(States.DRIVE_WALL)
                 .onEnter( () -> {

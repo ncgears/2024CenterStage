@@ -319,7 +319,7 @@ autonShort extends OpMode {
                 .onEnter( () -> {
                     robot.playAudio("Drive to backstage",500);
                     elapsed.reset();
-                    driveInchesPID(6);
+                    driveInchesPID(8);
                 })
                 .onExit( () -> {
                     pid_driving = false;

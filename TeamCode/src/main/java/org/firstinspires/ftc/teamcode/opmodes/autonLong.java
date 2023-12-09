@@ -363,12 +363,6 @@ autonLong extends OpMode {
                 .onExit( () -> {
                     pid_turning = false;
                 })
-                .transition( () -> (elapsed.seconds() >= 0.75 && pid_turning && turnpid.atTarget(robot.getRobotYaw())) )
-                /** Move manipulator to start position */
-                .state(States.MANIP_START)
-                .onEnter( () -> {
-                    m_manip_pos = Constants.Manipulator.Positions.TRANSPORT;
-                })
                 .transitionWithPointerState( () -> (true), States.RESTING)
                 /** Move sideways to clear the backdrop for another robot */
                 .state(States.STRAFE_CLEAR)
@@ -392,6 +386,7 @@ autonLong extends OpMode {
                 /** Wait until end of auton */
                 .state(States.RESTING)
                 .onEnter( () -> {
+                    m_manip_pos = Constants.Manipulator.Positions.ZERO;
                     pid_driving = false;
                     pid_turning = false;
                     strafing = false;

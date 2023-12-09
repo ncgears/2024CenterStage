@@ -114,7 +114,6 @@ public class hwMecanumFtclib {
     // Define a constructor that allows the OpMode to pass a reference to itself.
     public hwMecanumFtclib(OpMode opmode) {
         myOpMode = opmode;
-        teleop = (myOpMode.toString().indexOf("teleopMecanum") > 0); //"org.firstinspires.ftc.teamcode.opmodes.teleopMecanum"
     }
     /**
      * Initialize all the robot's hardware.
@@ -127,6 +126,8 @@ public class hwMecanumFtclib {
         // Define and Initialize Motors
         imu = hwMap.get(IMU.class, "imu"); //imu is BNO055 in EH
         //imu = hwMap.get(IMU.class, "imu2"); //imu2 is BHI260AP in CH
+        //This is used for deciding to reset the elevator and tilt
+        teleop = (myOpMode.toString().indexOf("teleopMecanum") > 0); //"org.firstinspires.ftc.teamcode.opmodes.teleopMecanum"
 
         m_motor_fl = new Motor(hwMap, "fl drive");
         m_motor_fr = new Motor(hwMap, "fr drive");

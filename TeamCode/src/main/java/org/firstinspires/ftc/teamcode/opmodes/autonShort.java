@@ -340,7 +340,7 @@ autonShort extends OpMode {
                 .state(States.CLEAR_GOAL)
                 .onEnter( () -> {
                     robot.playAudio("Get out the way",500);
-                    driveInchesPID(-7.0);
+                    driveInchesPID(-6.0);
                 })
                 .onExit( () -> {
                     pid_driving = false;

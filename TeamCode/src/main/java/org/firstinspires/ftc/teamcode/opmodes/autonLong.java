@@ -19,11 +19,11 @@ import org.firstinspires.ftc.teamcode.pidcontrollers.pidTurnControllerFtclib;
 import org.firstinspires.ftc.teamcode.processors.tseSaturationProcessor;
 import org.firstinspires.ftc.vision.VisionPortal;
 
-@Autonomous(name="Short Auton", group="JRB")
+@Autonomous(name="Long Auton", group="JRB")
 //@Disabled
 public class
 autonLong extends OpMode {
-    boolean m_long_auton = false; //set true if this is the long auton
+    boolean m_long_auton = true; //set true if this is the long auton
     hwMecanumFtclib robot = new hwMecanumFtclib(this);
     ElapsedTime runtime = new ElapsedTime();
     ElapsedTime elapsed = new ElapsedTime();

@@ -129,6 +129,11 @@ public class hwMecanumFtclib {
         //This is used for deciding to reset the elevator and tilt
         teleop = (myOpMode.toString().indexOf("teleopMecanum") > 0); //"org.firstinspires.ftc.teamcode.opmodes.teleopMecanum"
 
+        /* //Get reference to the relative layout so we can change the color of the robot controller app to match the alliance color
+        int relativeLayoutId = hwMap.appContext.getResources().getIdentifier("RelativeLayout","id", hwMap.appContext.getPackageName());
+        relativeLayout = ((Activity) hwMap.appContext).findViewById(relativeLayoutId);
+        */
+
         m_motor_fl = new Motor(hwMap, "fl drive");
         m_motor_fr = new Motor(hwMap, "fr drive");
         m_motor_rl = new Motor(hwMap, "rl drive");

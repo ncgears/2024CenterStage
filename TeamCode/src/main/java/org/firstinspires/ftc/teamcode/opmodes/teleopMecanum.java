@@ -299,10 +299,10 @@ public class teleopMecanum extends OpMode {
 
         /** DPAD_UP and DPAD_DOWN handles adjusting the tilt offset */
         if (!o_up && robot.operOp.getButton(GamepadKeys.Button.DPAD_UP)) { //tilt offset up
-            o_up = true;
+//            o_up = true;
             tiltpid.increaseOffset();
         } else if (!o_dn && robot.operOp.getButton(GamepadKeys.Button.DPAD_DOWN)) { //tilt offset down
-            o_dn = true;
+//            o_dn = true;
             tiltpid.decreaseOffset();
         } else if (o_up && !robot.operOp.getButton(GamepadKeys.Button.DPAD_UP)) { //released the button
             o_up = false;

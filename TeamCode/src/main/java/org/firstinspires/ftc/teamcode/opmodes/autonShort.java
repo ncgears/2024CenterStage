@@ -178,7 +178,7 @@ autonShort extends OpMode {
                 .onEnter( () -> {
                     //robot.playAudio("Drive Pixel 1",500);
                     elapsed.reset();
-                    driveInchesPID(-8);
+                    driveInchesPID(1); //-7 -> 0 -> 1
                 })
                 .onExit( () -> {
                     pid_driving = false;
@@ -229,7 +229,7 @@ autonShort extends OpMode {
                 .onEnter( () -> {
                     elapsed.reset();
                     robot.playAudio("Drive Pixel 2",500);
-                    driveInchesPID(-5);
+                    driveInchesPID(-4);
                 })
                 .onExit( () -> {
                     pid_driving = false;
@@ -255,7 +255,7 @@ autonShort extends OpMode {
                 .onEnter( () -> {
                     robot.playAudio("Drive Pixel 3",500);
                     elapsed.reset();
-                    double distance = 10.0;
+                    double distance = 11.0; //10
 
                     driveInchesPID(distance);
                 })
@@ -319,7 +319,7 @@ autonShort extends OpMode {
                 .onEnter( () -> {
                     robot.playAudio("Drive to backstage",500);
                     elapsed.reset();
-                    driveInchesPID(8);
+                    driveInchesPID(13); //7911 Adjustment
                 })
                 .onExit( () -> {
                     pid_driving = false;

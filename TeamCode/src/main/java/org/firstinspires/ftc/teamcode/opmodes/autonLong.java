@@ -178,7 +178,7 @@ autonLong extends OpMode {
                 .onEnter( () -> {
                     //robot.playAudio("Drive Pixel 1",500);
                     elapsed.reset();
-                    driveInchesPID(-8);
+                    driveInchesPID(-7);
                 })
                 .onExit( () -> {
                     pid_driving = false;
@@ -229,7 +229,7 @@ autonLong extends OpMode {
                 .onEnter( () -> {
                     elapsed.reset();
                     robot.playAudio("Drive Pixel 2",500);
-                    driveInchesPID(-5);
+                    driveInchesPID(-4);
                 })
                 .onExit( () -> {
                     pid_driving = false;
@@ -255,7 +255,7 @@ autonLong extends OpMode {
                 .onEnter( () -> {
                     robot.playAudio("Drive Pixel 3",500);
                     elapsed.reset();
-                    double distance = 10.0;
+                    double distance = 9.0;
 
                     driveInchesPID(distance);
                 })

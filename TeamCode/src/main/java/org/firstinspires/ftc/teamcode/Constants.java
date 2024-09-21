@@ -127,7 +127,7 @@ public class Constants {
             public static double kD = 0.002; //0.002
             public static class limits {
                 public static double maxOutput = 0.75; //maximum output power
-                public static double minTicks = 0.0; //Minimum encoder ticks of target (at limit sw)
+                public static double minTicks = -5000.0; //Minimum encoder ticks of target (at limit sw)
                 public static double maxTicks = 9000.0; //Maximum encoder ticks of target (at limit sw)
             }
         }
